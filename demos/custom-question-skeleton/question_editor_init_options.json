@@ -1,47 +1,68 @@
 {
-    "question_type_templates": {
-      "custom_question_skeleton": [
-        {
-          "name": "Custom Question - Skeleton",
-          "description": "A clean custom question - Skeleton",
-          "group_reference": "other",
-          "defaults": {
-            "type": "custom",
-            "stimulus": "This is stimulus",
-            "js": {
-              "question": "/dist/question.js",
-              "scorer": "/dist/scorer.js"
-            },
-            "css": "/dist/question.css",
-            "instant_feedback": true
-          }
-        }
-      ]
-    },
-    "custom_question_types": [
+  "question_type_templates": {
+    "custom_question_click_correct": [
       {
-        "custom_type": "custom_question_skeleton",
-        "type": "custom",
-        "name": "Custom Question - Skeleton",
-        "editor_layout": "/dist/authoring_custom_layout.html",
-        "js": {
-          "question": "/dist/question.js",
-          "scorer": "/dist/scorer.js"
-        },
-        "css": "/dist/question.css",
-        "version": "v1.0.0",
-        "editor_schema": {
-          "hidden_question": false,
-          "attributes": {
-              "instant_feedback": {
-                "name": "Check answer button",
-                "description": "Enables the Check Answer button underneath the question, which will provide the student with instant feedback on their response(s).",
-                "type": "boolean",
-                "required": false,
-                "default": false
-              }
-          }
+        "name": "Custom Question - Mission click and correct",
+        "description": "A clean custom question - Mission click and correct",
+        "group_reference": "cloze",
+        "defaults": {
+          "type": "custom",
+          "stimulus": "Remplis ici le texte de ta question",
+          "js": {
+            "question": "/dist/question.js",
+            "scorer": "/dist/scorer.js"
+          },
+          "css": "/dist/question.css",
+          "instant_feedback": true
         }
       }
     ]
-  }
+  },
+  "custom_question_types": [
+    {
+      "custom_type": "custom_question_click_correct",
+      "type": "custom",
+      "name": "Custom Question - Mission click and corrects",
+      "editor_layout": "/dist/authoring_custom_layout.html",
+      "js": {
+        "question": "/dist/question.js",
+        "scorer": "/dist/scorer.js"
+      },
+      "css": "/dist/question.css",
+      "version": "v1.0.0",
+      "editor_schema": {
+        "hidden_question": false,
+        "attributes": {
+          "custom_question_click_correct_template": {
+            "type": "question",
+            "name": "Saisis ta question ici !",
+            "description": "HTML template for the question",
+            "element": "string",
+            "white_list": [
+              "options",
+              "multiple_responses",
+              "is_math",
+              "ui_style",
+              "min_selection",
+              "max_selection"
+            ],
+            "default": "my default data"
+          },
+          "valid_response": {
+            "type": "question",
+            "name": "Set correct answer(s)",
+            "description": "Correct answer for the question",
+            "whitelist_attributes": ["valid_response", "value"]
+          },
+          "instant_feedback": {
+            "name": "Check answer button",
+            "description": "Enables the Check Answer button underneath the question, which will provide the student with instant feedback on their response(s).",
+            "type": "boolean",
+            "required": true,
+            "default": true
+          }
+        }
+      }
+    }
+  ]
+}

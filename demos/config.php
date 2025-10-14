@@ -68,11 +68,11 @@ function signAuthoringRequest($request)
                         'answers' => true,
                         'scoring' => true,
                         'reference' => [
-                            'edit' => false,
-                            'show' => false
+                            'edit' => true,
+                            'show' => true
                         ],
                         'save' => true,
-                        'status' => false,
+                        'status' => true,
                         'dynamic_content' => true,
                         'shared_passage' => true
                     ]
