@@ -43,11 +43,24 @@ $signedRequest = signAuthoringRequest(json_decode($request, true));
 <script>
     window.activity = <?php echo $signedRequest; ?>;
 
-    window.authorApp = LearnosityAuthor.init(activity, {
+ window.authorApp = LearnosityAuthor.init(activity, {
         readyListener() {
             console.log('ready');
-            console.log('Current activity:', window.authorApp.getWidget());
         },
+        // custom buttons callback here
+        customButtons: [{
+            name: 'insertPepe',
+            icon: "https://questioneditor.learnosity.com/v3.135.1/vendor/ckeditor/plugins/icons.png?t=M2G9",
+            label: "Insert Pepe",
+            func: function customInsertResponse(attribute, callback) {
+                var pepeHtml = '<img src=\"https://freepngimg.com/download/icon/reddit/71680-emoticon-reddit-sticker-pepe-frog-pol-the.png\" alt=\"Pepe the Frog\" title=\"Pepe Meme\" style=\"width: 50px; height: 50px; display: inline-block;\">';
+                return callback(pepeHtml);
+            },
+            attributes: [
+                "custom_question_click_correct_template"
+            ]
+        }],
+        // end cusom buttons callback
         errorListener(e) {
             console.error(e);
         },

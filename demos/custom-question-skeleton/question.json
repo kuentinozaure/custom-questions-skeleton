@@ -1,7 +1,7 @@
 {
   "type": "custom",
   "stimulus": "La reponse affiche ici viens de la propriete valid_response dans question.json",
-  "valid_response": "bonjour",
+  "valid_response": ["bonjour"],
   "yourCustomProperty": "yourCustomValue",
   "yourCustomProperty2": "yourCustomValue2",
   "yourCustomProperty3": "yourCustomValue3",
