@@ -53,7 +53,9 @@ $signedRequest = signAuthoringRequest(json_decode($request, true));
             icon: "https://questioneditor.learnosity.com/v3.135.1/vendor/ckeditor/plugins/icons.png?t=M2G9",
             label: "Insert Pepe",
             func: function customInsertResponse(attribute, callback) {
-                var pepeHtml = '<img src=\"https://freepngimg.com/download/icon/reddit/71680-emoticon-reddit-sticker-pepe-frog-pol-the.png\" alt=\"Pepe the Frog\" title=\"Pepe Meme\" style=\"width: 50px; height: 50px; display: inline-block;\">';
+                var pepeHtml = `<div class="search-box">
+                            <input type="text" class="search-input" placeholder="Cliquez-moi..." />
+                        </div>`;
                 return callback(pepeHtml);
             },
             attributes: [

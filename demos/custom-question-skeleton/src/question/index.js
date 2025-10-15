@@ -69,20 +69,15 @@ export default class Question {
     console.log("Question init.question object:", question);
     console.log("Question init.response object:", response);
 
-    const component = `  <div class="search-box">
-                            <input type="text" class="search-input" placeholder="Cliquez-moi..." />
-                        </div>`;
+    // const component = `  <div class="search-box">
+    //                         <input type="text" class="search-input" placeholder="Cliquez-moi..." />
+    //                     </div>`;
 
     // TODO: Requires implementation
     el.innerHTML = `
         <div class="${PREFIX} lrn-response-validation-wrapper">
           <div class="lrn_response_input">
             <div class="container">
-              salut 
-              ${Array.from({ length: 10 })
-                .map(() => component)
-                .join("")}
-              c'est ma question personnalisée
             </div>
           </div>
           <div class="${PREFIX}-checkAnswer-wrapper"></div>
