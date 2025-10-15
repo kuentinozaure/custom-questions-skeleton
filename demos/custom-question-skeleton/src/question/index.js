@@ -11,6 +11,7 @@ export default class Question {
       this.registerPublicMethods();
       this.handleEvents();
 
+      this.renderTest();
       /**
        * @param { String } init.state - the state of Questions API.
        * state can be any of the following 3 strings
@@ -58,27 +59,50 @@ export default class Question {
     });
   }
 
-  render() {
+  renderTest() {
     const { el, init, lrnUtils } = this;
     const { question, response } = init;
 
-    console.log(this);
+    const template = question.custom_question_click_correct_template
+      ? question.custom_question_click_correct_template
+      : null;
 
-    // TODO: Requires implementation
-    el.innerHTML = `
+    console.log("custom_question_click_correct_template:", template);
+    const globalTemplate = ` 
         <div class="${PREFIX} lrn-response-validation-wrapper">
           <div class="lrn_response_input">
             <div class="container">
-              ${question.custom_question_click_correct_template}
+
+              ${template}
             </div>
           </div>
           <div class="${PREFIX}-checkAnswer-wrapper"></div>
           <div class="${PREFIX}-suggestedAnswers-wrapper"></div>
         </div>
       `;
+    el.innerHTML = globalTemplate;
+  }
 
-    //    Ceci est ma reponse de la question (question.valid_response): ${question.valid_response}
-    // </br>
+  render() {
+    const { el, init, lrnUtils } = this;
+    const { question, response } = init;
+
+    const template = question.custom_question_click_correct_template
+      ? question.custom_question_click_correct_template
+      : null;
+    const globalTemplate = ` 
+        <div class="${PREFIX} lrn-response-validation-wrapper">
+          <div class="lrn_response_input">
+            <div class="container">
+            <!-- Render the custom template defined in question.json --!>
+            </div>
+          </div>
+          <div class="${PREFIX}-checkAnswer-wrapper"></div>
+          <div class="${PREFIX}-suggestedAnswers-wrapper"></div>
+        </div>
+      `;
+    // TODO: Requires implementation
+    el.innerHTML = globalTemplate;
 
     // Optional - Render optional Learnosity components like Check Answer Button, Suggested Answers List
     // first before rendering your question's components
@@ -93,13 +117,7 @@ export default class Question {
       ),
     ]).then(([suggestedAnswersList]) => {
       this.suggestedAnswersList = suggestedAnswersList;
-
-      // TODO - Requires implementation
-      /**  The logic to render the UI of your custom question should go here.
-       *
-       * For example this might be a call to a function or instantiation of a class to render your UI component(s).
-       *
-       */
+      this.renderTest();
     });
   }
 
@@ -219,6 +237,8 @@ export default class Question {
         events.trigger("changed", key.value);
         facade.validate();
       });
+
+      this.renderTest();
     }
 
     // TODO: Requires implementation - Make sure you trigger 'changed' event after the user changes their responses to your custom quesiton:

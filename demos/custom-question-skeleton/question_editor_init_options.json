@@ -15,7 +15,6 @@
           "css": "/dist/question.css",
           "instant_feedback": true,
           "valid_response": {
-            "type": "array",
             "value": ["bonjour", "salut"]
           }
         }
