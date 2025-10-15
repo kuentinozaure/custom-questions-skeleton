@@ -1,10 +1,8 @@
 {
   "type": "custom",
   "stimulus": "La reponse affiche ici viens de la propriete valid_response dans question.json",
-  "valid_response": ["bonjour"],
-  "yourCustomProperty": "yourCustomValue",
-  "yourCustomProperty2": "yourCustomValue2",
-  "yourCustomProperty3": "yourCustomValue3",
+  "valid_response": ["bonjour", "salut"],
+  "custom_question_click_correct_template": "<div class=\"search-box\">\n    <input type=\"text\" class=\"search-input\" placeholder=\"Cliquez-moi...\" />\n</div>",
   "js": {
     "question": "/dist/question.js",
     "scorer": "/dist/scorer.js"

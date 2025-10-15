@@ -49,18 +49,18 @@ $signedRequest = signAuthoringRequest(json_decode($request, true));
         },
         // custom buttons callback here
         customButtons: [{
-            name: 'insertPepe',
+            name: 'insertQuestionClickCorrectTemplate',
             icon: "https://questioneditor.learnosity.com/v3.135.1/vendor/ckeditor/plugins/icons.png?t=M2G9",
-            label: "Insert Pepe",
+            label: "Insert Question Click Correct Template",
             func: function customInsertResponse(attribute, callback) {
-                var pepeHtml = `<div class="search-box">
+                var templateHtml = `<div class="search-box">
                             <input type="text" class="search-input" placeholder="Cliquez-moi..." />
                         </div>`;
-                return callback(pepeHtml);
+                return callback(templateHtml);
             },
-            attributes: [
-                "custom_question_click_correct_template"
-            ]
+            // attributes: [
+            //     "custom_question_click_correct_template"
+            // ]
         }],
         // end cusom buttons callback
         errorListener(e) {

@@ -62,22 +62,14 @@ export default class Question {
     const { el, init, lrnUtils } = this;
     const { question, response } = init;
 
-    console.log("Rendering custom question...");
-    console.log("Question element:", el);
-    console.log("Learnosity Utils object:", lrnUtils);
-    console.log("Question init object:", init);
-    console.log("Question init.question object:", question);
-    console.log("Question init.response object:", response);
-
-    // const component = `  <div class="search-box">
-    //                         <input type="text" class="search-input" placeholder="Cliquez-moi..." />
-    //                     </div>`;
+    console.log(this);
 
     // TODO: Requires implementation
     el.innerHTML = `
         <div class="${PREFIX} lrn-response-validation-wrapper">
           <div class="lrn_response_input">
             <div class="container">
+              ${question.custom_question_click_correct_template}
             </div>
           </div>
           <div class="${PREFIX}-checkAnswer-wrapper"></div>
