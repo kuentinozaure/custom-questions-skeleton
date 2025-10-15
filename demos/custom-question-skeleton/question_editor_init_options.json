@@ -34,18 +34,10 @@
         "hidden_question": false,
         "attributes": {
           "custom_question_click_correct_template": {
-            "type": "question",
+            "type": "editor",
             "name": "Saisis ta question ici !",
             "description": "HTML template for the question",
-            "element": "string",
-            "white_list": [
-              "options",
-              "multiple_responses",
-              "is_math",
-              "ui_style",
-              "min_selection",
-              "max_selection"
-            ],
+            "element": "editor",
             "default": "my default data"
           },
           "valid_response": {

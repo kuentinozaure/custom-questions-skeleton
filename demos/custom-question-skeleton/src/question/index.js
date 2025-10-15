@@ -62,22 +62,36 @@ export default class Question {
     const { el, init, lrnUtils } = this;
     const { question, response } = init;
 
+    console.log("Rendering custom question...");
+    console.log("Question element:", el);
+    console.log("Learnosity Utils object:", lrnUtils);
+    console.log("Question init object:", init);
+    console.log("Question init.question object:", question);
+    console.log("Question init.response object:", response);
+
+    const component = `  <div class="search-box">
+                            <input type="text" class="search-input" placeholder="Cliquez-moi..." />
+                        </div>`;
+
     // TODO: Requires implementation
     el.innerHTML = `
-            <div class="${PREFIX} lrn-response-validation-wrapper">
-                <div class="lrn_response_input">
-                    Ceci est ma reponse de la question (question.valid_response): ${question.valid_response}
-                    </br>
-                    <div class="container">
-                        <div class="search-box">
-                            <input type="text" class="search-input" placeholder="Cliquez-moi..." />
-                        </div>
-                    </div>
-                </div>
-                <div class="${PREFIX}-checkAnswer-wrapper"></div>
-                <div class="${PREFIX}-suggestedAnswers-wrapper"></div>
+        <div class="${PREFIX} lrn-response-validation-wrapper">
+          <div class="lrn_response_input">
+            <div class="container">
+              salut 
+              ${Array.from({ length: 10 })
+                .map(() => component)
+                .join("")}
+              c'est ma question personnalisée
             </div>
-        `;
+          </div>
+          <div class="${PREFIX}-checkAnswer-wrapper"></div>
+          <div class="${PREFIX}-suggestedAnswers-wrapper"></div>
+        </div>
+      `;
+
+    //    Ceci est ma reponse de la question (question.valid_response): ${question.valid_response}
+    // </br>
 
     // Optional - Render optional Learnosity components like Check Answer Button, Suggested Answers List
     // first before rendering your question's components

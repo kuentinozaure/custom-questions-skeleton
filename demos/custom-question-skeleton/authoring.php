@@ -46,12 +46,15 @@ $signedRequest = signAuthoringRequest(json_decode($request, true));
     window.authorApp = LearnosityAuthor.init(activity, {
         readyListener() {
             console.log('ready');
+            console.log('Current activity:', window.authorApp.getWidget());
         },
         errorListener(e) {
             console.error(e);
         },
     });
 
+
+    console.log(window.activity);
     // Display the current request init options & html layout
     document.querySelector('[data-type="initOptions"] > textarea').value = `${JSON.stringify(window.activity, null, 2)}`;
     document.querySelector('[data-type="htmlLayout"] > textarea').value = `<?php echo (file_get_contents('dist/authoring_custom_layout.html')) ?>`;
