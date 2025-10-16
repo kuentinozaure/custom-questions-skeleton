@@ -10,8 +10,6 @@ export default class Question {
     this.render().then(() => {
       this.registerPublicMethods();
       this.handleEvents();
-
-      this.renderTest();
       /**
        * @param { String } init.state - the state of Questions API.
        * state can be any of the following 3 strings
@@ -56,36 +54,36 @@ export default class Question {
       //   }
 
       init.events.trigger("ready");
+      console.log("%c Question ready event triggered", "color:green;");
     });
   }
 
-  renderTest() {
-    const { el, init, lrnUtils } = this;
-    const { question, response } = init;
+  renderDomQuestion() {
+    const { el, init } = this;
+    const { question } = init;
 
     const template = question.custom_question_click_correct_template
       ? question.custom_question_click_correct_template
       : null;
 
-    console.log("custom_question_click_correct_template:", template);
-    const globalTemplate = ` 
-        <div class="${PREFIX} lrn-response-validation-wrapper">
-          <div class="lrn_response_input">
-            <div class="container">
+    if (!template) {
+      console.warn("No template found in question JSON");
+      return;
+    }
 
-              ${template}
-            </div>
-          </div>
-          <div class="${PREFIX}-checkAnswer-wrapper"></div>
-          <div class="${PREFIX}-suggestedAnswers-wrapper"></div>
-        </div>
-      `;
-    el.innerHTML = globalTemplate;
+    const containerQuestion = el.querySelector(".question-rendering-container");
+    containerQuestion.innerHTML = "";
+    const templateContent = document
+      .createRange()
+      .createContextualFragment(template);
+
+    containerQuestion.innerHTML = templateContent;
+    containerQuestion.appendChild(templateContent);
   }
 
   render() {
     const { el, init, lrnUtils } = this;
-    const { question, response } = init;
+    const { question } = init;
 
     const template = question.custom_question_click_correct_template
       ? question.custom_question_click_correct_template
@@ -93,9 +91,7 @@ export default class Question {
     const globalTemplate = ` 
         <div class="${PREFIX} lrn-response-validation-wrapper">
           <div class="lrn_response_input">
-            <div class="container">
-            <!-- Render the custom template defined in question.json --!>
-            </div>
+            <div class="question-rendering-container"></div>
           </div>
           <div class="${PREFIX}-checkAnswer-wrapper"></div>
           <div class="${PREFIX}-suggestedAnswers-wrapper"></div>
@@ -117,7 +113,8 @@ export default class Question {
       ),
     ]).then(([suggestedAnswersList]) => {
       this.suggestedAnswersList = suggestedAnswersList;
-      this.renderTest();
+
+      this.renderDomQuestion();
     });
   }
 
@@ -232,13 +229,11 @@ export default class Question {
       });
 
       key.addEventListener("blur", () => {
-        console.log("Input blurred");
-        console.log("Input value:", key.value);
         events.trigger("changed", key.value);
         facade.validate();
       });
 
-      this.renderTest();
+      // this.renderTest();
     }
 
     // TODO: Requires implementation - Make sure you trigger 'changed' event after the user changes their responses to your custom quesiton:

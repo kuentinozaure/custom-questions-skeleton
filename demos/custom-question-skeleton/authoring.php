@@ -41,26 +41,30 @@ $signedRequest = signAuthoringRequest(json_decode($request, true));
 </div>
 
 <script>
-    window.activity = <?php echo $signedRequest; ?>;
 
+window.activity = <?php echo $signedRequest; ?>;
+
+
+// <div class="search-box">
+//                             <input type="text" class="search-input" placeholder="Cliquez-moi..." />
+//                         </div>
  window.authorApp = LearnosityAuthor.init(activity, {
         readyListener() {
             console.log('ready');
         },
+        
         // custom buttons callback here
         customButtons: [{
             name: 'insertQuestionClickCorrectTemplate',
             icon: "https://questioneditor.learnosity.com/v3.135.1/vendor/ckeditor/plugins/icons.png?t=M2G9",
             label: "Insert Question Click Correct Template",
             func: function customInsertResponse(attribute, callback) {
-                var templateHtml = `<div class="search-box">
-                            <input type="text" class="search-input" placeholder="Cliquez-moi..." />
-                        </div>`;
+                var templateHtml = `<input type="text" class="search-input" placeholder="Cliquez-moi..." /> `;
                 return callback(templateHtml);
             },
-            // attributes: [
-            //     "custom_question_click_correct_template"
-            // ]
+            attributes: [
+                "custom_question_click_correct_template"
+            ]
         }],
         // end cusom buttons callback
         errorListener(e) {

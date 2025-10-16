@@ -40,8 +40,7 @@
             "type": "editor",
             "name": "Saisis ta question ici !",
             "description": "HTML template for the question",
-            "element": "editor",
-            "default": "my default data"
+            "element": "editor"
           },
           "valid_response": {
             "type": "question",

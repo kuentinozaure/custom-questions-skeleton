@@ -12,7 +12,7 @@ export default class Scorer {
   isValid() {
     // TODO: Requires implementation
 
-    console.log("response", this.response);
+    // console.log("response", this.response);
     return false;
   }
 
@@ -26,7 +26,7 @@ export default class Scorer {
    */
   validateIndividualResponses() {
     // TODO: Requires implementation
-    console.log("response", this.response);
+    // console.log("response", this.response);
     return null;
   }
 
@@ -36,7 +36,7 @@ export default class Scorer {
    */
   score() {
     // TODO: Requires implementation
-    console.log("response", this.response);
+    // console.log("response", this.response);
     return 0;
   }
 
@@ -46,7 +46,7 @@ export default class Scorer {
    */
   maxScore() {
     // TODO: Requires implementation
-    console.log("response", this.response);
+    // console.log("response", this.response);
     return 0;
   }
 
@@ -58,7 +58,7 @@ export default class Scorer {
    * @returns {boolean}
    */
   canValidateResponse() {
-    console.log("response", this.response);
+    // console.log("response", this.response);
     if (
       this.response === "" ||
       this.response === this.question.valid_response
