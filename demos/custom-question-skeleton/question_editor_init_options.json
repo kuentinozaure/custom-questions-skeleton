@@ -46,7 +46,11 @@
             "type": "question",
             "name": "Set correct answer(s)",
             "description": "Correct answer for the question",
-            "whitelist_attributes": ["valid_response", "value"]
+            "white_list": [
+              "custom_question_click_correct_template",
+              "valid_response",
+              "value"
+            ]
           },
           "instant_feedback": {
             "name": "Check answer button",
