@@ -72,12 +72,10 @@ export default class Question {
     }
 
     const containerQuestion = el.querySelector(".question-rendering-container");
-    containerQuestion.innerHTML = "";
     const templateContent = document
       .createRange()
       .createContextualFragment(template);
 
-    containerQuestion.innerHTML = templateContent;
     containerQuestion.appendChild(templateContent);
   }
 
@@ -232,8 +230,6 @@ export default class Question {
         events.trigger("changed", key.value);
         facade.validate();
       });
-
-      // this.renderTest();
     }
 
     // TODO: Requires implementation - Make sure you trigger 'changed' event after the user changes their responses to your custom quesiton:
