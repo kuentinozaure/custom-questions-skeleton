@@ -14,9 +14,8 @@
           },
           "css": "/dist/question.css",
           "instant_feedback": true,
-          "valid_response": {
-            "value": ["bonjour", "salut"]
-          }
+          "score": 1,
+          "valid_response": []
         }
       }
     ]

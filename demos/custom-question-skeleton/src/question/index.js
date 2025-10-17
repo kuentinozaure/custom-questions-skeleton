@@ -2,6 +2,7 @@ import { PREFIX } from "./constants";
 
 export default class Question {
   constructor(init, lrnUtils) {
+    this.textInputValue = [];
     this.init = init;
     this.events = init.events;
     this.lrnUtils = lrnUtils;
@@ -81,11 +82,7 @@ export default class Question {
 
   render() {
     const { el, init, lrnUtils } = this;
-    const { question } = init;
 
-    const template = question.custom_question_click_correct_template
-      ? question.custom_question_click_correct_template
-      : null;
     const globalTemplate = ` 
         <div class="${PREFIX} lrn-response-validation-wrapper">
           <div class="lrn_response_input">
@@ -161,6 +158,11 @@ export default class Question {
       // re-render the component, manage the 'reset' state by yourself
     };
     facade.showValidationUI = () => {
+      if (facade.isValid()) {
+        el.querySelector(".lrn_response_input").classList.add("lrn_correct");
+      } else {
+        el.querySelector(".lrn_response_input").classList.add("lrn_incorrect");
+      }
       // TODO: requires implementation
       /**
        * The purpose of this method is to update your custom question's UI with visual feedback
@@ -188,6 +190,8 @@ export default class Question {
       // }
     };
     facade.resetValidationUI = () => {
+      el.querySelector(".lrn_response_input").classList.remove("lrn_correct");
+      el.querySelector(".lrn_response_input").classList.remove("lrn_incorrect");
       // TODO: requires implementation
       /**
        * If you implement showValidationUI() above, then you need to implement this method also.
@@ -215,6 +219,7 @@ export default class Question {
 
   handleEvents() {
     const { el, events, init } = this;
+    const { question, response } = init;
     const facade = init.getFacade();
 
     const keys = facade.getKeys();
@@ -222,13 +227,12 @@ export default class Question {
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
 
-      key.addEventListener("focus", () => {
-        console.log("Input focused");
-      });
+      key.addEventListener("focus", () => {});
 
       key.addEventListener("blur", () => {
-        events.trigger("changed", key.value);
-        facade.validate();
+        this.textInputValue[i] = key.value;
+        facade.resetValidationUI();
+        events.trigger("changed", this.textInputValue);
       });
     }
 
@@ -285,6 +289,7 @@ export default class Question {
       // OPTIONAL Step 1:
       //If you want to show changes to the UI for a correct or incorrect answer when the learner presses check answer
       // then make sure you have also implemented facade.showValidationUI(), and that you call it here:
+
       facade.showValidationUI();
 
       // OPTIONAL Step 2:
@@ -314,8 +319,6 @@ export default class Question {
 
       //     // this.suggestedAnswersList.setAnswers(this.question.valid_response);
       // }
-
-      console.log("Validate event triggered with options", options);
     });
   }
 }

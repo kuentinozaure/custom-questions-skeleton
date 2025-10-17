@@ -1,8 +1,8 @@
 {
   "type": "custom",
   "stimulus": "La reponse affiche ici viens de la propriete valid_response dans question.json",
-  "valid_response": [],
-  "custom_question_click_correct_template": "<div class=\"search-box\">\n    <input type=\"text\" class=\"search-input\" placeholder=\"Cliquez-moi...\" />\n</div>",
+  "valid_response": ["test", "test2"],
+  "custom_question_click_correct_template": "<input type=\"text\" class=\"search-input\" placeholder=\"Cliquez-moi...\" /> <input type=\"text\" class=\"search-input\" placeholder=\"Cliquez-moi...\" />",
   "js": {
     "question": "/dist/question.js",
     "scorer": "/dist/scorer.js"

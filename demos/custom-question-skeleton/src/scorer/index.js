@@ -11,9 +11,13 @@ export default class Scorer {
    */
   isValid() {
     // TODO: Requires implementation
+    const { valid_response } = this.question;
 
-    // console.log("response", this.response);
-    return false;
+    if (JSON.stringify(valid_response) !== JSON.stringify(this.response)) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -27,6 +31,7 @@ export default class Scorer {
   validateIndividualResponses() {
     // TODO: Requires implementation
     // console.log("response", this.response);
+    console.log("validateIndividualResponses not implemented yet");
     return null;
   }
 
@@ -58,13 +63,6 @@ export default class Scorer {
    * @returns {boolean}
    */
   canValidateResponse() {
-    // console.log("response", this.response);
-    if (
-      this.response === "" ||
-      this.response === this.question.valid_response
-    ) {
-      return true;
-    }
-    return false;
+    return true;
   }
 }
