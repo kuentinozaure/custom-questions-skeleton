@@ -111,6 +111,10 @@ export default class Question {
         />);
     }
 
+    onValueChange(dropdownIndex, value) {
+        this.events.trigger('changed', {...this.init.response, [dropdownIndex]: value})
+    }
+
     /**
      * Add public methods to the created question instance that is accessible during runtime
      *

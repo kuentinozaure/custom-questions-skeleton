@@ -58,7 +58,7 @@
               "type": "question",
               "name": "Set correct answer(s)",
               "description": "Correct answer for the question",
-              "white_list": ["valid_response", "value", "dropdown_configs", "custom_question_skeleton"]
+              "white_list": ["valid_response", "value", "dropdown_configs", "custom_dropdown_template"]
             },
             "dropdown_configs": {
               "name": "Dropdowns",
