@@ -1,8 +1,9 @@
-import React from "react";
+import React, {useState} from "react";
 import {Dropdown} from "./Dropdown";
 
 export const TemplateRenderer = ({template, question, onDropdownChange, responseValue}) => {
     const parts = template.split('{{dropdown}}');
+    const [currentResponse, setCurrentResponse] = useState(responseValue);
 
     return (
         <div>
@@ -13,10 +14,14 @@ export const TemplateRenderer = ({template, question, onDropdownChange, response
                     )}
                     {index < parts.length - 1 && (
                         <Dropdown
-                            value={responseValue[0]}
+                            value={currentResponse[index]}
                             options={question.dropdown_configs?.[index]?.options ?? []}
                             placeholder={question.dropdown_configs?.[index]?.placeholder ?? ""}
-                            onChange={(value) => onDropdownChange(index, value)}
+                            onChange={(value) => {
+                                const updatedResponse = {...currentResponse, [index]: value}
+                                setCurrentResponse(updatedResponse);
+                                onDropdownChange(updatedResponse)
+                            }}
                         />
                     )}
                 </React.Fragment>

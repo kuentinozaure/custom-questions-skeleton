@@ -2,6 +2,7 @@ export default class Scorer {
     constructor(question, response) {
         this.question = question;
         this.response = response;
+
     }
 
     /**
@@ -10,9 +11,9 @@ export default class Scorer {
      * @returns {boolean}
      */
     isValid() {
-        // TODO: Requires implementation
-
-        return false;
+        return Object.entries(this.question.valid_response).every(([index, value]) => {
+            return this.response[index] === value;
+        })
     }
 
     /**

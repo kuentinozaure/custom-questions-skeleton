@@ -78,6 +78,10 @@ export default class Question {
                 <div class="${PREFIX}-suggestedAnswers-wrapper"></div>
             </div>
         `;
+        const reactDomContainer = el.querySelector('.question-rendering-container');
+
+        this.reactRoot = ReactDOM.createRoot(reactDomContainer);
+        this.renderComponent()
 
         // Optional - Render optional Learnosity components like Check Answer Button, Suggested Answers List
         // first before rendering your question's components
@@ -87,10 +91,6 @@ export default class Question {
         ]).then(([suggestedAnswersList]) => {
             this.suggestedAnswersList = suggestedAnswersList;
 
-            const reactDomContainer = el.querySelector('.question-rendering-container');
-
-            this.reactRoot = ReactDOM.createRoot(reactDomContainer);
-            this.renderComponent()
         });
     }
 
@@ -103,16 +103,13 @@ export default class Question {
         reactRoot.render(<TemplateRenderer
             template={template}
             question={question}
-            onDropdownChange={(dropdown, value) => {
-                console.log("Value changed to: ", dropdown, value)
-                this.onValueChange(dropdown, value)
-            }}
-            responseValue={init.response ?? {}}
+            onDropdownChange={(responses) => this.onValueChange(responses)}
+            responseValue={response ?? {}}
         />);
     }
 
-    onValueChange(dropdownIndex, value) {
-        this.events.trigger('changed', {...this.init.response, [dropdownIndex]: value})
+    onValueChange(responses) {
+        this.events.trigger('changed', responses)
     }
 
     /**
