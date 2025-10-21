@@ -1,0 +1,73 @@
+<div class="lrn-qe-edit-form">
+
+    <span data-lrn-qe-label="stimulus"></span>
+    <span data-lrn-qe-input="stimulus" class="lrn-qe-ckeditor-lg"></span>
+
+    <span data-lrn-qe-label="custom_dropdown_template"></span>
+    <span data-lrn-qe-input="custom_dropdown_template"></span>
+
+
+    <span data-lrn-qe-label="valid_response" data-lrn-qe-heading="4" data-lrn-qe-section="validation.heading"
+          class="lrn-qe-h4 lrn-qe-section-header lrn-qe-text-bold lrn-qe-border-none"></span>
+
+    <span data-lrn-qe-input="valid_response"></span>
+
+
+
+    <div data-lrn-qe-section="dropdown_configs.content">
+        <span data-lrn-qe-label="dropdown_configs"></span>
+
+        <div data-lrn-qe-loop="dropdown_configs[*]">
+
+            <span data-lrn-qe-label="dropdown_configs[*]"></span>
+            <!-- Compteur quand on ajoute des dropdowns-->
+            <span data-lrn-element-index="dropdown_configs[*]"></span>
+            <span data-lrn-qe-action-remove="dropdown_configs[*]" class="lrn-qe-float-right"></span>
+
+            <!-- Placeholder-->
+            <div class="lrn-qe-row-flex">
+                <div class="lrn-qe-col-xs-12 lrn-qe-col-sm-12" data-lrn-qe-layout-wrapper>
+                    <span data-lrn-qe-label="dropdown_configs[*].placeholder"></span>
+                    <span data-lrn-qe-input="dropdown_configs[*].placeholder"></span>
+                </div>
+            </div>
+
+            <!-- Options-->
+            <span data-lrn-qe-label="dropdown_configs[*].options"></span>
+
+            <div>
+                <div class="lrn-qe-margin-bottom-sm">
+                    <div>
+                        <span data-lrn-qe-action-remove="dropdown_configs[*].options" class="lrn-qe-float-right"></span>
+                        <span data-lrn-qe-label="dropdown_configs[*].options[*]"></span>
+                    </div>
+                    <div class="lrn-qe-clear-both"></div>
+                </div>
+
+                <div data-lrn-qe-loop="dropdown_configs[*].options[*]">
+                    <span data-lrn-qe-input="dropdown_configs[*].options[*]"></span>
+                </div>
+                <span data-lrn-qe-action-add="dropdown_configs[*].options" class="lrn-qe-padding-top-sm"></span>
+            </div>
+        </div>
+
+        <span data-lrn-qe-action-add="dropdown_configs"></span>
+    </div>
+
+    <h4 class="lrn-qe-heading" data-lrn-qe-adv-toggle>
+        <button type="button" class="lrn-qe-form-label lrn-qe-margin-top-none lrn-qe-more-options" data-lrn-qe-section="more_options.heading">
+            <span class="lrn-qe-i-arrow lrn-qe-inline-block" data-lrn-qe-section="more_options.toggle"></span>
+            <span class="lrn-qe-inline-block lrn-qe-text-bold">
+                <label class="lrn-qe-label lrn-qe-form-label-name" data-lrn-qe-i18n-label="heading.moreOptions" value="More options"></label>
+            </span>
+        </button>
+    </h4>
+    <div data-lrn-qe-adv-content data-lrn-qe-section="more_options.content">
+        <div class="lrn-qe-row-flex" data-lrn-qe-layout-wrapper>
+            <div class="lrn-qe-col-xs-12 lrn-qe-col-sm-6">
+                <span data-lrn-qe-input="instant_feedback" class="lrn-qe-inline-block"></span>
+                <span data-lrn-qe-label="instant_feedback" class="lrn-qe-inline-block"></span>
+            </div>
+        </div>
+    </div>
+</div>
