@@ -1,0 +1,13 @@
+@import "variables";
+.lrn-custom-question {
+    @import "question";
+}
+
+.lrn-response-validation-wrapper {
+    overflow: visible;
+}
+
+.lrn-qe-question-container {
+    height: 200px;
+    padding-top: 50px;
+}

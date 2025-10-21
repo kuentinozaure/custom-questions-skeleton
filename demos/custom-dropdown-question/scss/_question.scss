@@ -1,0 +1,34 @@
+/*********************************************************
+Write any CSS styling rules for your custom question HERE. 
+There is no need to create your own file called question.css 
+Based on the CSS you write here, the question.css file will be generated 
+automatically for you by webpack when you build the production version of your question by running yarn-prod. 
+************************************************************/
+.search-box {
+  position: relative;
+}
+
+.search-input {
+  width: 50px; /* Largeur initiale */
+  height: 40px;
+  padding: 0 10px;
+  border: 2px solid #ccc;
+  border-radius: 20px;
+  outline: none;
+  transition: width 0.5s ease-in-out, border-radius 0.5s ease-in-out;
+}
+
+.search-input::placeholder {
+  color: transparent; /* Masque le placeholder par défaut */
+}
+
+.search-input:focus {
+  width: 250px; /* Largeur quand on clique */
+  border-color: dodgerblue;
+  padding: 0 20px;
+  border-radius: 5px;
+}
+
+.question-rendering-container {
+  display: flex;
+}
