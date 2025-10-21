@@ -1,10 +1,16 @@
 {
+  "question_type_groups": [
+    {
+      "name": "Custom Question Types",
+      "reference": "custom_q_types"
+    }
+  ],
     "question_type_templates": {
       "custom_question_skeleton": [
         {
           "name": "Custom Question - Skeleton",
           "description": "A clean custom question - Skeleton",
-          "group_reference": "other",
+          "group_reference" : "custom_q_types",
           "defaults": {
             "type": "custom",
             "stimulus": "This is stimulus",
@@ -13,7 +19,9 @@
               "scorer": "/dist/scorer.js"
             },
             "css": "/dist/question.css",
-            "instant_feedback": true
+            "instant_feedback": true,
+            "valid_response": {},
+            "dropdown_configs": []
           }
         }
       ]
@@ -33,13 +41,60 @@
         "editor_schema": {
           "hidden_question": false,
           "attributes": {
-              "instant_feedback": {
-                "name": "Check answer button",
-                "description": "Enables the Check Answer button underneath the question, which will provide the student with instant feedback on their response(s).",
-                "type": "boolean",
-                "required": false,
-                "default": false
+            "instant_feedback": {
+              "name": "Check answer button",
+              "description": "Enables the Check Answer button underneath the question, which will provide the student with instant feedback on their response(s).",
+              "type": "boolean",
+              "required": false,
+              "default": false
+            },
+            "custom_dropdown_template": {
+              "type": "editor",
+              "name": "Saisis ta question ici !",
+              "description": "HTML template for the question",
+              "element": "editor"
+            },
+            "valid_response": {
+              "type": "question",
+              "name": "Set correct answer(s)",
+              "description": "Correct answer for the question",
+              "white_list": ["valid_response", "value", "dropdown_configs", "custom_question_skeleton"]
+            },
+            "dropdown_configs": {
+              "name": "Dropdowns",
+              "type": "array",
+              "description": "Configuration for each dropdown",
+              "required": true,
+              "count": {
+                "minimum": 1
+              },
+              "items": {
+                "type": "object",
+                "name": "Dropdown",
+                "attributes": {
+                  "placeholder": {
+                    "name": "Placeholder",
+                    "description": "Value initially displayed in the dropdown",
+                    "type": "string",
+                    "required": false,
+                    "default": "?"
+                  },
+                  "options": {
+                    "name": "Options",
+                    "type": "array",
+                    "count": {
+                      "minimum": 2
+                    },
+                    "items": {
+                      "type": "string",
+                      "name": "Option",
+                      "required": false,
+                      "default": "?"
+                    }
+                  }
+                }
               }
+            }
           }
         }
       }

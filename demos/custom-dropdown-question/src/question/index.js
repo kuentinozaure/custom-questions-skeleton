@@ -98,7 +98,7 @@ export default class Question {
         const { reactRoot, init } = this;
         const { state, question, response } = init;
 
-        const template = question.custom_question_skeleton || '';
+        const template = question.custom_dropdown_template || '';
 
         reactRoot.render(<TemplateRenderer
             template={template}
