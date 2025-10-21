@@ -6,7 +6,7 @@
     }
   ],
     "question_type_templates": {
-      "custom_question_skeleton": [
+      "custom_dropdown": [
         {
           "name": "Custom Question - Skeleton",
           "description": "A clean custom question - Skeleton",
@@ -28,7 +28,7 @@
     },
     "custom_question_types": [
       {
-        "custom_type": "custom_question_skeleton",
+        "custom_type": "custom_dropdown",
         "type": "custom",
         "name": "Custom Question - Skeleton",
         "editor_layout": "/dist/authoring_custom_layout.html",

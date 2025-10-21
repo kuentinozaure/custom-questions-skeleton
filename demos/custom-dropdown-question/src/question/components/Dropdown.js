@@ -37,7 +37,7 @@ export const Dropdown = ({onChange, value, placeholder, options}) => {
 
     return (
         <div style={dropdownContainerStyle} ref={dropdownRef}>
-            <div style={dropdownTriggerStyle(selectedValue, placeholder)} onClick={handleToggle}>
+            <div style={dropdownTriggerStyle(selectedValue)} onClick={handleToggle}>
                 {selectedValue !== undefined ? selectedValue : placeholder}
             </div>
 
@@ -67,8 +67,8 @@ const dropdownContainerStyle = {
     overflow: 'visible', // Ensure dropdown menu is not clipped
 };
 
-const dropdownTriggerStyle = (selectedValue, placeholder) => ({
-    // backgroundColor: '#f9f9f9',
+const dropdownTriggerStyle = (selectedValue) => ({
+    backgroundColor: '#f9f9f9',
     border: '1px solid #ccc',
     padding: '10px 15px',
     cursor: 'pointer',
@@ -79,7 +79,6 @@ const dropdownTriggerStyle = (selectedValue, placeholder) => ({
     width: '100%',
     boxSizing: 'border-box', // Ensures padding is included in the width
     color: selectedValue ? '#333' : '#888',
-    backgroundColor: placeholder ? 'pink' : "#f9f9f9"
 })
 
 const dropdownOptionsStyle = {
