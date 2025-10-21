@@ -1,0 +1,26 @@
+/*********************************************************
+Write any CSS styling rules for your custom question HERE. 
+There is no need to create your own file called question.css 
+Based on the CSS you write here, the question.css file will be generated 
+automatically for you by webpack when you build the production version of your question by running yarn-prod. 
+************************************************************/
+
+.lrn_response_input {
+    padding: 2em 0.75em;
+    line-height: 3;
+    .student-question {
+        border: 1px solid royalblue;
+        padding: 1rem;
+    }
+
+    .response-input {
+        line-height: 2;
+    }
+    .response-input.disabled {
+        cursor: not-allowed;
+    }
+    .blank {
+        color: white
+    }
+}
+

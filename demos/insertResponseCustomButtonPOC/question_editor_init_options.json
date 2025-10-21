@@ -1,0 +1,95 @@
+{
+  "question_type_groups": [
+    {
+      "name": "Custom",
+      "reference": "custom_questions"
+    }
+  ],
+  "question_type_templates": {
+    "custom_question_skeleton": [
+      {
+        "name": "Custom Question - Skeleton",
+        "description": "A clean custom question - Skeleton",
+        "group_reference": "custom_questions",
+        "defaults": {
+          "type": "custom",
+          "stimulus": "Fill in the blanks",
+          "validation": {
+            "valid_response": {
+              "value": ["red"],
+              "score": 1
+            }
+          },
+          "template": "Roses are <span class=\"custom-response-placeholder\" contenteditable=\"false\"><span class=\"response-number\">1</span>Response</span>",
+          "js": {
+            "question": "/dist/question.js",
+            "scorer": "/dist/scorer.js"
+          },
+          "css": "/dist/question.css",
+          "instant_feedback": true
+        }
+      }
+    ]
+  },
+  "custom_question_types": [
+    {
+      "custom_type": "custom_question_skeleton",
+      "type": "custom",
+      "name": "Custom Question - NMC Cloze Formula",
+      "editor_layout": "/dist/authoring_custom_layout.html",
+      "js": {
+        "question": "/dist/question.js",
+        "scorer": "/dist/scorer.js"
+      },
+      "css": "/dist/question.css",
+      "version": "v1.0.0",
+      "editor_schema": {
+        "hidden_question": false,
+        "attributes": {
+          "instant_feedback": {
+            "name": "Check answer button",
+            "description": "Enables the Check Answer button underneath the question, which will provide the student with instant feedback on their response(s).",
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "template": {
+            "name": "Template markup",
+            "description": "template for the question",
+            "type": "string",
+            "element": "editor",
+            "default": "Roses are <span class=\"custom-response-placeholder\" contenteditable=\"false\"><span class=\"response-number\">1</span>Response</span>",
+            "required": true
+          },
+          "validation": {
+            "type": "object",
+            "name": "Validation",
+            "attributes": {
+              "valid_response": {
+                "type": "object",
+                "name": "Valid response",
+                "attributes": {
+                  "value": {
+                    "type": "question",
+                    "name": "Set Correct Answer(s):",
+                    "white_list": [
+                      "template",
+                      "validation",
+                      "valid_response",
+                      "value",
+                      "score"
+                    ]
+                  },
+                  "score": {
+                    "type": "number",
+                    "name": "Score"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

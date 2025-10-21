@@ -1,0 +1,17 @@
+{
+    "type": "custom",
+    "stimulus": "Fill in the blanks",
+    "validation": {
+        "valid_response": {
+            "value": ["red"],
+            "score": 1
+        }
+    },
+    "template": "Roses are <span class=\"custom-response-placeholder\" contenteditable=\"false\"><span class=\"response-number\">1</span>Response</span>",
+    "js": {
+        "question": "/dist/question.js",
+        "scorer": "/dist/scorer.js"
+    },
+    "css": "/dist/question.css",
+    "instant_feedback": true
+}
