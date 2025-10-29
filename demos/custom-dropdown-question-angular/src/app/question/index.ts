@@ -6,8 +6,8 @@
  * Learnosity's public API.
  */
 
-import { createComponent, ComponentRef, createEnvironmentInjector } from '@angular/core';
-import { createApplication } from '@angular/platform-browser'
+import { createComponent, ComponentRef, createEnvironmentInjector, EnvironmentInjector } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { TemplateRendererComponent } from '../components/template-renderer/template-renderer.component';
 import { PREFIX } from '../constants';
 import '../../styles/main.scss';
@@ -32,6 +32,7 @@ export default class Question {
   private lrnUtils: LrnUtils;
   private el: HTMLElement;
   private componentRef: ComponentRef<TemplateRendererComponent> | null = null;
+  private environmentInjector: EnvironmentInjector | null = null;
   private suggestedAnswersList: any;
 
   constructor(init: InitOptions, lrnUtils: LrnUtils) {
@@ -106,29 +107,13 @@ export default class Question {
       </div>
     `;
 
-    const container = el.querySelector('.question-rendering-container') as HTMLElement;
+    const container = el.querySelector('.question-rendering-container') as HTMLElement | undefined;
 
     if (!container) {
       throw new Error('Question rendering container not found');
     }
 
-    try {
-      const appRef = await createApplication({
-        providers: []
-      });
-
-      this.componentRef = createComponent(TemplateRendererComponent, {
-        environmentInjector: appRef.injector,
-        hostElement: container
-      });
-
-      this.renderComponent();
-
-      this.componentRef.changeDetectorRef.detectChanges();
-    } catch (error) {
-      console.error('Error creating Angular component:', error);
-      throw error;
-    }
+    await this.renderComponent(container);
 
     return Promise.all([
       lrnUtils.renderComponent('SuggestedAnswersList', el.querySelector(`.${PREFIX}-suggestedAnswers-wrapper`)),
@@ -138,25 +123,41 @@ export default class Question {
     });
   }
 
-  renderComponent() {
-    if (!this.componentRef) {
-      return;
-    }
-
+  async renderComponent(container: HTMLElement) {
     const { init } = this;
     const { question, response } = init;
 
     const template = question.custom_dropdown_template || '';
 
-    this.componentRef.setInput('template', template);
-    this.componentRef.setInput('question', question);
-    this.componentRef.setInput('responseValue', response ?? {});
+    try {
+      // Create minimal environment injector without application context
+      this.environmentInjector = createEnvironmentInjector(
+        [
+          { provide: DOCUMENT, useValue: document }
+        ],
+        null as any // No parent injector needed for standalone components
+      );
 
-    this.componentRef.instance.dropdownChange.subscribe((responses: any) => {
-      this.onValueChange(responses);
-    });
+      // Create the standalone component
+      this.componentRef = createComponent(TemplateRendererComponent, {
+        environmentInjector: this.environmentInjector,
+        hostElement: container
+      });
 
-    this.componentRef.changeDetectorRef.detectChanges();
+      this.componentRef.setInput('template', template);
+      this.componentRef.setInput('question', question);
+      this.componentRef.setInput('responseValue', response ?? {});
+
+      this.componentRef.instance.dropdownChange.subscribe((responses: any) => {
+        this.onValueChange(responses);
+      });
+
+      this.componentRef.changeDetectorRef.detectChanges();
+
+    } catch (error) {
+      console.error('Error creating Angular component:', error);
+      throw error;
+    }
   }
 
   onValueChange(responses: any) {
