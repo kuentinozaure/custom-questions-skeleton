@@ -1,4 +1,11 @@
 {
+  "scripts": {
+    "dev": "yarn install && php -S localhost:1234 & webpack watch --mode development --devtool eval-source-map",
+    "prod": "yarn install && webpack --mode production",
+    "debug-server-scorer": "node ./debugServerScorer.js",
+    "unit-tests": "jest",
+    "unit-tests-watch": "jest --watch"
+  },
   "dependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
@@ -24,12 +31,5 @@
     "style-loader": "^3.3.0",
     "webpack": "^5.59.1",
     "webpack-cli": "^4.9.1"
-  },
-  "scripts": {
-    "dev": "yarn install && php -S localhost:1234 & webpack watch --mode development --devtool eval-source-map",
-    "prod": "yarn install && webpack --mode production",
-    "debug-server-scorer": "node ./debugServerScorer.js",
-    "unit-tests": "jest",
-    "unit-tests-watch": "jest --watch"
   }
 }

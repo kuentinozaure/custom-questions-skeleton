@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Custom Learnosity dropdown question type built with Angular 20 standalone components",
   "scripts": {
-    "dev": "webpack watch --mode development --devtool eval-source-map",
+    "dev": "yarn install && php -S localhost:1234 & webpack watch --mode development --devtool eval-source-map",
     "build": "webpack --mode production",
     "test": "jest",
     "test:watch": "jest --watch"

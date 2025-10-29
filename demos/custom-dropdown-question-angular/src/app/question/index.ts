@@ -6,7 +6,8 @@
  * Learnosity's public API.
  */
 
-import { createComponent, ComponentRef, createEnvironmentInjector, EnvironmentInjector } from '@angular/core';
+import { createComponent, ComponentRef, createEnvironmentInjector } from '@angular/core';
+import { createApplication } from '@angular/platform-browser'
 import { TemplateRendererComponent } from '../components/template-renderer/template-renderer.component';
 import { PREFIX } from '../constants';
 import '../../styles/main.scss';
@@ -31,7 +32,6 @@ export default class Question {
   private lrnUtils: LrnUtils;
   private el: HTMLElement;
   private componentRef: ComponentRef<TemplateRendererComponent> | null = null;
-  private environmentInjector: EnvironmentInjector | null = null;
   private suggestedAnswersList: any;
 
   constructor(init: InitOptions, lrnUtils: LrnUtils) {
@@ -112,27 +112,24 @@ export default class Question {
       throw new Error('Question rendering container not found');
     }
 
-    // Create Angular component using modern standalone approach
     try {
-      // Create an environment injector for the standalone component
-      this.environmentInjector = createEnvironmentInjector([], null as any);
+      const appRef = await createApplication({
+        providers: []
+      });
 
-      // Create the component
       this.componentRef = createComponent(TemplateRendererComponent, {
-        environmentInjector: this.environmentInjector,
+        environmentInjector: appRef.injector,
         hostElement: container
       });
 
       this.renderComponent();
 
-      // Manually trigger change detection
       this.componentRef.changeDetectorRef.detectChanges();
     } catch (error) {
       console.error('Error creating Angular component:', error);
       throw error;
     }
 
-    // Optional - Render optional Learnosity components like Check Answer Button, Suggested Answers List
     return Promise.all([
       lrnUtils.renderComponent('SuggestedAnswersList', el.querySelector(`.${PREFIX}-suggestedAnswers-wrapper`)),
       lrnUtils.renderComponent('CheckAnswerButton', el.querySelector(`.${PREFIX}-checkAnswer-wrapper`))

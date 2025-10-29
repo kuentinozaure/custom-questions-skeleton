@@ -14,47 +14,10 @@ export default class Question {
             this.registerPublicMethods();
             this.handleEvents();
 
-            /**
-             * @param { String } init.state - the state of Questions API.
-             * state can be any of the following 3 strings
-             * "initial" for first starting the assessment,
-             * "resume" for coming back to a previously started assessment,
-             * "review" for showing the completed assessment and results to the learner or teacher
-             */
-
              if (init.state === 'resume') {
-                /**
-                 * If you want your custom question to support resume state
-                 * (For a learner to be able to come back to your question in a future sitting after having previously started and saved the assessment),
-                 * then make make sure to update your question's UI to display the previously saved response Questions API has stored in the back end.
-                 */
-
-                // EXAMPLE implementation:
-                // if(init.response) {
-                //     // This example assumes a simple DOM input for the custom question's UI, and updates its value to the value of the saved response upon resume.
-                //     document.getElementById('my-input').value = init.response.value;
-                // }
             }
 
             if (init.state === 'review') {
-                   /**
-                 * If you want your custom question to support review state
-                 * (For a learner or instructor to be able to view their results in a read-only mode after having completed and submitted the assessment),
-                 * then make make sure to update your question's UI to display the previously submitted response Questions API has stored in the back end.
-                 * NOTE: this is required if you intend to use Reports API with your custom question (for example the session-detail-by-item report).
-                 */
-
-                // EXAMPLE implementation:
-                // if(init.response) {
-                //     // This example assumes a simple DOM input for the custom questions UI, and updates its value to the value of the submitted response upon review.
-                //     document.getElementById('my-input').value = init.response.value;
-                // }
-
-                /**
-                 * below, we call the disable public method on the custom question to display it in a read-only mode
-                 * to learners and/or instructors viewing the completed results.
-                 * (Please see this.registerPublicMethods below for more detials about the .disable() method, including an example implementation)
-                 */
                 init.getFacade().disable();
             }
 
