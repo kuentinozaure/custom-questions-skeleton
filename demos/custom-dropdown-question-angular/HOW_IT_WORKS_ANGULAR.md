@@ -2,16 +2,16 @@
 
 ## Overview
 
-The custom-dropdown-question-angular is a Learnosity custom question type that lets authors create fill-in-the-blank style questions with dropdown selections embedded in custom HTML templates. It's built with **Angular 20** standalone components and integrates seamlessly with the Learnosity assessment platform.
+The custom-dropdown-question-angular is a Learnosity custom question type that lets authors create fill-in-the-blank style questions with dropdown selections embedded in custom HTML templates. It's built with **Angular 20** using the latest **signals-based architecture** and modern Angular patterns, integrating seamlessly with the Learnosity assessment platform.
 
 ## Technology Stack
 
-- **Angular 20.0.0** - Modern standalone components architecture
+- **Angular 20.0.0** - Modern standalone components with signals
+- **Angular Signals** - Reactive state management (input(), output(), signal(), computed(), effect())
 - **TypeScript 5.6.0** - Type-safe development
-- **RxJS 7.8.1** - Reactive programming with observables
 - **Zone.js 0.15.0** - Change detection (using noop zone for performance)
 - **Webpack 5** - Module bundling and build system
-- **SCSS** - Styling with Sass preprocessor
+- **SCSS** - Component-scoped styling
 - **Jest** - Unit testing framework
 
 ## Project Structure
@@ -22,12 +22,10 @@ custom-dropdown-question-angular/
 │   ├── app/
 │   │   ├── components/
 │   │   │   ├── dropdown/
-│   │   │   │   ├── dropdown.component.ts        # Standalone dropdown component
-│   │   │   │   ├── dropdown.component.html      # Dropdown template
+│   │   │   │   ├── dropdown.component.ts        # Dropdown with inline template
 │   │   │   │   └── dropdown.component.scss      # Dropdown styles
 │   │   │   └── template-renderer/
-│   │   │       ├── template-renderer.component.ts   # Template parser component
-│   │   │       ├── template-renderer.component.html # Renderer template
+│   │   │       ├── template-renderer.component.ts   # Renderer with inline template
 │   │   │       └── template-renderer.component.scss # Renderer styles
 │   │   ├── question/
 │   │   │   └── index.ts                         # Main Question controller class
@@ -49,79 +47,130 @@ custom-dropdown-question-angular/
 └── package.json                                 # Dependencies and scripts
 ```
 
-## How Angular is Integrated
+## Modern Angular Patterns Used
 
-### The Integration Pattern
+This implementation uses the **latest Angular features** (Angular 17+):
 
-Unlike typical Angular applications that bootstrap a full app module, this implementation **embeds Angular standalone components within Learnosity's custom question framework**. The Question class (vanilla TypeScript) manages the Angular component lifecycle using Angular's modern component creation APIs.
-
+### 1. **Signal-Based Inputs and Outputs**
 ```typescript
-// src/app/question/index.ts
-class Question {
-    private componentRef: ComponentRef<TemplateRendererComponent> | null = null;
-    private appRef: ApplicationRef | null = null;
+// Instead of @Input() and @Output()
+value = input<string | undefined>(undefined);
+options = input<string[]>([]);
+valueChange = output<string>();
+```
 
-    constructor(init: InitOptions, lrnUtils: LrnUtils) {
-        // Initialize question
-        this.render().then(() => {
-            this.registerPublicMethods();
-            this.handleEvents();
-            this.events.trigger('ready');
-        });
-    }
+### 2. **Signals for State Management**
+```typescript
+// Reactive state using signals
+isOpen = signal(false);
+currentResponse = signal<ResponseValue>({});
+```
 
-    async render(): Promise<void> {
-        // Create DOM structure
-        this.el.innerHTML = `
-            <div class="${PREFIX} lrn-response-validation-wrapper">
-                <div class="lrn_response_input">
-                    <div class="question-rendering-container"></div>
-                </div>
-                <!-- validation containers -->
-            </div>
-        `;
+### 3. **Computed Values**
+```typescript
+// Derived values that automatically update
+displayValue = computed(() => {
+    const val = this.value();
+    return val !== undefined ? val : this.placeholder();
+});
+```
 
-        // Bootstrap Angular component using modern API
-        const platform = platformBrowserDynamic();
-        const moduleRef = await platform.bootstrapModule(
-            class { ngDoBootstrap() {} } as any,
-            { ngZone: 'noop' } // Use noop zone for better performance
-        );
+### 4. **Effects for Side Effects**
+```typescript
+// React to signal changes
+effect(() => {
+    const templateValue = this.template();
+    this.parseTemplate(templateValue);
+});
+```
 
-        this.appRef = moduleRef.injector.get(ApplicationRef);
-        const injector = moduleRef.injector.get(EnvironmentInjector);
-
-        // Create standalone component
-        this.componentRef = createComponent(TemplateRendererComponent, {
-            environmentInjector: injector,
-            hostElement: container
-        });
-
-        // Set inputs using modern API
-        this.componentRef.setInput('template', this.question.custom_dropdown_template);
-        this.componentRef.setInput('question', this.question);
-        this.componentRef.setInput('responseValue', this.response.value);
-
-        // Subscribe to outputs
-        this.componentRef.instance.dropdownChange.subscribe((responses) => {
-            this.onValueChange(responses);
-        });
-
-        // Attach view to application
-        this.appRef.attachView(this.componentRef.hostView);
-        this.componentRef.changeDetectorRef.detectChanges();
-    }
+### 5. **Modern Template Syntax**
+```typescript
+// @if and @for instead of *ngIf and *ngFor
+@if (isOpen()) {
+    <ul>
+        @for (option of options(); track option) {
+            <li>{{ option }}</li>
+        }
+    </ul>
 }
 ```
 
-### Why This Approach?
+### 6. **Inline Templates with Separate Styles**
+```typescript
+@Component({
+  template: `<div>...</div>`,          // Inline HTML
+  styleUrl: './component.scss'         // Separate SCSS file
+})
+```
 
-1. **Learnosity Compatibility** - Works within Learnosity's AMD module system
-2. **Modern Angular Architecture** - Uses standalone components (no NgModule required)
-3. **Performance Optimization** - Uses noop zone for better performance
-4. **Lifecycle Control** - Question class manages when Angular components mount/unmount
-5. **State Management** - Question class bridges between Learnosity API and Angular components
-6. **Event Integration** - Seamlessly triggers Learnosity events from Angular components
+## Component Architecture
+
+### DropdownComponent Example
+
+```typescript
+@Component({
+  selector: 'app-dropdown',
+  standalone: true,
+  template: `
+    <div class="dropdown-container" [class]="validationClass()">
+      <button
+        class="dropdown-trigger"
+        [class.has-value]="value() !== undefined"
+        [disabled]="isDisabled()"
+        (click)="toggleDropdown()"
+      >
+        {{ displayValue() }}
+      </button>
+
+      @if (isOpen()) {
+        <ul class="dropdown-options">
+          @for (option of options(); track option) {
+            <li [class.selected]="isSelected(option)" (click)="selectOption(option)">
+              {{ option }}
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  `,
+  styleUrl: './dropdown.component.scss'
+})
+export class DropdownComponent {
+  // Signal-based inputs
+  value = input<string | undefined>(undefined);
+  options = input<string[]>([]);
+  isDisabled = input<boolean>(false);
+  
+  // Signal-based output
+  valueChange = output<string>();
+  
+  // Internal state
+  isOpen = signal(false);
+  
+  // Computed values
+  displayValue = computed(() => 
+    this.value() ?? this.placeholder()
+  );
+  
+  toggleDropdown() {
+    if (!this.isDisabled()) {
+      this.isOpen.set(!this.isOpen());
+    }
+  }
+  
+  selectOption(option: string) {
+    this.valueChange.emit(option);
+    this.isOpen.set(false);
+  }
+}
+```
+
+**Benefits of This Approach:**
+- **Inline Template**: Easy to see component structure at a glance
+- **Separate Styles**: Better organization for complex styling, SCSS features, and reusability
+- **Signals**: Fine-grained reactivity and automatic dependency tracking
+- **Modern Syntax**: @if/@for for better performance and type checking
 
 ## Core Components
 
@@ -146,979 +195,341 @@ resetValidationUI() // Clear validation feedback
 isValid()           // Check if response is correct
 ```
 
-**Event Flow:**
-```typescript
-onValueChange(responses: { [key: string]: string }): void {
-    // Update internal response object
-    this.response = { value: responses };
+### 2. TemplateRendererComponent
 
-    // Update scorer with new response
-    this.scorer = new Scorer(this.question, this.response.value);
+**Role:** Parses template and embeds dropdown components using modern Angular signals
 
-    // Trigger Learnosity 'changed' event
-    this.events.trigger('changed', this.response);
-}
-```
-
-**Angular Integration:**
-```typescript
-// Re-render component with updated options
-private renderComponent(options = {}): void {
-    if (!this.componentRef) return;
-
-    const { isDisabled = false, validationStates = {} } = options;
-
-    // Use modern setInput API
-    this.componentRef.setInput('responseValue', this.response.value);
-    this.componentRef.setInput('isDisabled', isDisabled);
-    this.componentRef.setInput('validationStates', validationStates);
-
-    // Manually trigger change detection
-    this.componentRef.changeDetectorRef.detectChanges();
-}
-```
-
-### 2. TemplateRendererComponent (`src/app/components/template-renderer/template-renderer.component.ts`)
-
-**Role:** Parses template and embeds dropdown components
-
-**Component Definition:**
 ```typescript
 @Component({
   selector: 'app-template-renderer',
   standalone: true,
-  imports: [CommonModule, DropdownComponent],
-  templateUrl: './template-renderer.component.html',
-  styleUrls: ['./template-renderer.component.scss'],
-  encapsulation: ViewEncapsulation.Emulated
-})
-export class TemplateRendererComponent implements OnInit, OnChanges
-```
+  imports: [DropdownComponent],
+  template: `
+    <div class="template-renderer">
+      @for (part of templateParts(); track $index) {
+        <span [innerHTML]="part.htmlContent"></span>
 
-**How It Works:**
-
-1. **Template Parsing** - Splits template string by `{{dropdown}}` tokens
-2. **Component Embedding** - Creates TemplatePart objects with dropdown configs
-3. **State Management** - Tracks current response in component state
-4. **Change Detection** - Responds to input changes via ngOnChanges
-5. **Change Handling** - Propagates dropdown changes to parent via EventEmitter
-
-```typescript
-private parseTemplate(): void {
-    const parts = this.template.split('{{dropdown}}');
-    const dropdownConfigs = this.question?.dropdown_configs || [];
-
-    this.templateParts = parts.map((htmlPart, index) => {
-        const isLastPart = index === parts.length - 1;
-        const templatePart: TemplatePart = {
-            htmlContent: this.sanitizeHtml(htmlPart),
-            isLastPart
-        };
-
-        // Add dropdown config if this is not the last part
-        if (!isLastPart) {
-            templatePart.dropdownConfig = dropdownConfigs[index] || {
-                placeholder: '?',
-                options: []
-            };
-            templatePart.dropdownIndex = index;
+        @if (!part.isLastPart && part.dropdownConfig) {
+          <app-dropdown
+            [value]="getDropdownValue(part.dropdownIndex!)"
+            [options]="part.dropdownConfig.options"
+            [placeholder]="part.dropdownConfig.placeholder || '?'"
+            [isDisabled]="isDisabled()"
+            [validationState]="getValidationState(part.dropdownIndex!)"
+            (valueChange)="onDropdownChange($event, part.dropdownIndex!)"
+          />
         }
-
-        return templatePart;
-    });
-}
-
-onDropdownChange(value: string, index: number): void {
-    const updatedResponse = {
-        ...this.currentResponse,
-        [index]: value
-    };
-    this.currentResponse = updatedResponse;
-    this.dropdownChange.emit(updatedResponse);
-}
-```
-
-**Template (template-renderer.component.html):**
-```html
-<div class="template-container">
-  @for (part of templateParts; track $index) {
-    <!-- Render HTML content -->
-    <span [innerHTML]="part.htmlContent"></span>
-
-    <!-- Render dropdown if not the last part -->
-    @if (!part.isLastPart && part.dropdownConfig) {
-      <app-dropdown
-        [value]="getDropdownValue(part.dropdownIndex!)"
-        [options]="part.dropdownConfig.options"
-        [placeholder]="part.dropdownConfig.placeholder || '?'"
-        [isDisabled]="isDisabled"
-        [validationState]="getValidationState(part.dropdownIndex!)"
-        (valueChange)="onDropdownChange($event, part.dropdownIndex!)"
-      ></app-dropdown>
-    }
-  }
-</div>
-```
-
-**Angular Patterns Used:**
-- **Standalone Components** - No NgModule required
-- **OnInit/OnChanges Lifecycle Hooks** - Managing initialization and updates
-- **EventEmitter** - Output events for parent communication
-- **DomSanitizer** - Secure HTML rendering
-- **@for Control Flow** - Modern Angular template syntax (v17+)
-- **@if Control Flow** - Conditional rendering
-
-### 3. DropdownComponent (`src/app/components/dropdown/dropdown.component.ts`)
-
-**Role:** Custom dropdown UI with Angular best practices
-
-**Component Definition:**
-```typescript
-@Component({
-  selector: 'app-dropdown',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './dropdown.component.html',
-  styleUrls: ['./dropdown.component.scss'],
-  encapsulation: ViewEncapsulation.Emulated
+      }
+    </div>
+  `,
+  styleUrl: './template-renderer.component.scss'
 })
-export class DropdownComponent
+export class TemplateRendererComponent {
+  // Signal-based inputs
+  template = input<string>('');
+  question = input.required<QuestionData>();
+  responseValue = input<ResponseValue>({});
+  isDisabled = input<boolean>(false);
+  validationStates = input<ValidationStates>({});
+
+  // Output
+  dropdownChange = output<ResponseValue>();
+
+  // Internal state using signals
+  currentResponse = signal<ResponseValue>({});
+  templateParts = signal<TemplatePart[]>([]);
+
+  constructor(private sanitizer: DomSanitizer) {
+    // Effect to parse template when it changes
+    effect(() => {
+      const templateValue = this.template();
+      const questionValue = this.question();
+      this.parseTemplate(templateValue, questionValue);
+    });
+
+    // Effect to update current response when responseValue changes
+    effect(() => {
+      const response = this.responseValue();
+      this.currentResponse.set({ ...response });
+    });
+  }
+
+  onDropdownChange(value: string, index: number): void {
+    const updatedResponse = {
+      ...this.currentResponse(),
+      [index]: value
+    };
+    this.currentResponse.set(updatedResponse);
+    this.dropdownChange.emit(updatedResponse);
+  }
+}
 ```
 
-**Features:**
-- Fully controlled component (value managed by parent)
-- Click-outside detection using @HostListener
-- Keyboard-friendly design
-- Component-scoped styling with ViewEncapsulation
-- Visual feedback for selected state and validation
-- Type-safe with TypeScript interfaces
+**Key Features:**
+- **Effects** automatically re-parse template when inputs change
+- **Signals** provide reactive state management
+- **Inline template** with @for/@if modern syntax
+- **Separate SCSS** for component styling
+
+### 3. DropdownComponent
+
+**Role:** Modern dropdown UI using Angular signals
 
 ```typescript
 export class DropdownComponent {
-  @Input() value: string | undefined;
-  @Input() options: string[] = [];
-  @Input() placeholder: string = '?';
-  @Input() isDisabled: boolean = false;
-  @Input() validationState: 'correct' | 'incorrect' | null = null;
+  // Signal-based inputs
+  value = input<string | undefined>(undefined);
+  options = input<string[]>([]);
+  placeholder = input<string>('?');
+  isDisabled = input<boolean>(false);
+  validationState = input<'correct' | 'incorrect' | null>(null);
 
-  @Output() valueChange = new EventEmitter<string>();
+  // Signal-based output
+  valueChange = output<string>();
 
-  isOpen: boolean = false;
+  // Internal state
+  isOpen = signal(false);
 
-  constructor(private elementRef: ElementRef) {}
+  // Computed values
+  displayValue = computed(() => {
+    const val = this.value();
+    return val !== undefined ? val : this.placeholder();
+  });
+
+  validationClass = computed(() => {
+    const state = this.validationState();
+    if (state === 'correct') return 'dropdown-correct';
+    if (state === 'incorrect') return 'dropdown-incorrect';
+    return '';
+  });
 
   toggleDropdown(): void {
-    if (!this.isDisabled) {
-      this.isOpen = !this.isOpen;
+    if (!this.isDisabled()) {
+      this.isOpen.set(!this.isOpen());
     }
   }
 
   selectOption(option: string): void {
-    this.value = option;
     this.valueChange.emit(option);
-    this.isOpen = false;
+    this.isOpen.set(false);
   }
 
-  // Click-outside detection using @HostListener
   @HostListener('document:mousedown', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.isOpen = false;
+      this.isOpen.set(false);
     }
-  }
-
-  get validationClass(): string {
-    if (this.validationState === 'correct') {
-      return 'dropdown-correct';
-    } else if (this.validationState === 'incorrect') {
-      return 'dropdown-incorrect';
-    }
-    return '';
   }
 }
-```
-
-**Template (dropdown.component.html):**
-```html
-<div class="dropdown-container" [class]="validationClass">
-  <button
-    class="dropdown-trigger"
-    [disabled]="isDisabled"
-    (click)="toggleDropdown()"
-    [class.is-open]="isOpen"
-  >
-    {{ displayValue }}
-    <span class="dropdown-arrow">▼</span>
-  </button>
-
-  @if (isOpen) {
-    <div class="dropdown-options">
-      @for (option of options; track option) {
-        <div
-          class="dropdown-option"
-          [class.selected]="isSelected(option)"
-          (click)="selectOption(option)"
-        >
-          {{ option }}
-        </div>
-      }
-    </div>
-  }
-</div>
 ```
 
 **Angular Patterns Used:**
-- **@Input/@Output Decorators** - Component communication
+- **input()** - Signal-based component inputs
+- **output()** - Modern event emitters
+- **signal()** - Reactive state management
+- **computed()** - Derived reactive values
 - **@HostListener** - DOM event listening
-- **ElementRef** - DOM access via dependency injection
-- **Getters** - Computed properties
-- **Property Binding** - Dynamic attributes and classes
-- **Event Binding** - User interaction handling
-- **@if/@for Control Flow** - Modern Angular template syntax
+- **@if/@for** - Modern control flow syntax
 
-### 4. Scorer Class (`src/app/scorer/index.ts`)
+## Data Flow with Signals
 
-**Role:** Server-side validation logic
+```
+1. INITIALIZATION
+   ├─ Angular component created with createComponent()
+   ├─ Inputs set via componentRef.setInput()
+   ├─ Input signals receive values
+   └─ Effects trigger automatically
 
-**Responsibilities:**
-- Validates student responses against correct answers
-- Provides scoring metrics
-- Returns validation state
+2. TEMPLATE PARSING (Reactive)
+   ├─ effect() runs when template() or question() signal changes
+   ├─ parseTemplate() processes the template string
+   ├─ templateParts signal updated
+   └─ Template automatically re-renders
 
+3. USER INTERACTION
+   ├─ Student clicks dropdown
+   ├─ isOpen signal updated: isOpen.set(true)
+   ├─ Template reactively shows options (@if)
+   ├─ Student selects option
+   ├─ valueChange output emits
+   ├─ Parent updates currentResponse signal
+   └─ Reactivity propagates through signal graph
+
+4. VALIDATION
+   ├─ validationStates input signal updated
+   ├─ computed() validationClass updates automatically
+   ├─ Template applies new classes
+   └─ Visual feedback shown instantly
+```
+
+## Angular Signals Deep Dive
+
+### Signal Types Used
+
+1. **input()** - Component inputs as signals
 ```typescript
-export default class Scorer {
-    private question: any;
-    private response: { [key: string]: string };
-
-    constructor(question: any, response: { [key: string]: string } = {}) {
-        this.question = question;
-        this.response = response;
-    }
-
-    isValid(): boolean {
-        const validResponse = this.question.valid_response || {};
-
-        // Check if all dropdown responses match valid_response
-        return Object.entries(validResponse).every(([index, value]) => {
-            return this.response[index] === value;
-        });
-    }
-
-    canValidateResponse(): boolean {
-        return true; // Question is scorable
-    }
-
-    validateIndividualResponses() {
-        // TODO: Implement individual response validation
-    }
-
-    score() {
-        // TODO: Implement scoring
-    }
-
-    maxScore() {
-        // TODO: Implement max score calculation
-    }
-}
+value = input<string>('default');           // Optional with default
+question = input.required<QuestionData>();   // Required input
 ```
 
-## Data Model
-
-### Question JSON Structure
-
-```json
-{
-    "type": "custom",
-    "custom_type": "custom_dropdown",
-    "stimulus": "<p>Question prompt text</p>",
-    "custom_dropdown_template": "The capital of France is {{dropdown}}. It has a population of {{dropdown}} million.",
-    "dropdown_configs": [
-        {
-            "placeholder": "?",
-            "options": ["Paris", "London", "Berlin"]
-        },
-        {
-            "placeholder": "?",
-            "options": ["2", "5", "10"]
-        }
-    ],
-    "valid_response": {
-        "0": "Paris",
-        "1": "2"
-    },
-    "instant_feedback": true
-}
-```
-
-### TypeScript Interfaces
-
+2. **output()** - Component outputs
 ```typescript
-interface DropdownConfig {
-  placeholder?: string;
-  options: string[];
-}
-
-interface QuestionData {
-  custom_dropdown_template: string;
-  dropdown_configs?: DropdownConfig[];
-  valid_response?: { [index: string]: string };
-}
-
-interface ResponseValue {
-  [index: string]: string;
-}
-
-interface ValidationStates {
-  [index: string]: 'correct' | 'incorrect' | null;
-}
+valueChange = output<string>();
+// Usage: this.valueChange.emit(value);
 ```
 
-### Response Structure
-
-```json
-{
-    "value": {
-        "0": "Paris",
-        "1": "2"
-    }
-}
-```
-
-**Key Points:**
-- Template uses `{{dropdown}}` tokens as placeholders
-- Each token position corresponds to an index in `dropdown_configs`
-- Response object uses numeric string keys matching dropdown positions
-- `valid_response` defines correct answer for each dropdown
-- TypeScript provides compile-time type safety
-
-## How Template Parsing Works
-
-### Step-by-Step Process
-
-**1. Template String:**
-```
-"The capital of France is {{dropdown}}. It has a population of {{dropdown}} million."
-```
-
-**2. Split by Token:**
+3. **signal()** - Writable signals
 ```typescript
-const parts = template.split('{{dropdown}}');
-// Result: ["The capital of France is ", ". It has a population of ", " million."]
+isOpen = signal(false);
+// Read: this.isOpen()
+// Write: this.isOpen.set(true)
+// Update: this.isOpen.update(val => !val)
 ```
 
-**3. Create TemplateParts:**
+4. **computed()** - Derived signals
 ```typescript
-this.templateParts = parts.map((htmlPart, index) => {
-    const isLastPart = index === parts.length - 1;
-    return {
-        htmlContent: this.sanitizeHtml(htmlPart),
-        dropdownConfig: !isLastPart ? dropdownConfigs[index] : undefined,
-        dropdownIndex: !isLastPart ? index : undefined,
-        isLastPart
-    };
+displayValue = computed(() => {
+    return this.value() || this.placeholder();
 });
 ```
 
-**4. Render in Template:**
-```html
-@for (part of templateParts; track $index) {
-  <span [innerHTML]="part.htmlContent"></span>
-  @if (!part.isLastPart) {
-    <app-dropdown [config]="part.dropdownConfig" ... />
-  }
-}
-```
-
-### Result in Browser
-
-```
-The capital of France is [Paris ▼]. It has a population of [2 ▼] million.
-```
-
-## Complete Data Flow
-
-```
-1. AUTHORING
-   ├─ Author creates question in Learnosity editor
-   ├─ authoring_custom_layout.html provides custom UI
-   ├─ question_editor_init_options.json defines schema
-   └─ Question JSON stored in Learnosity
-
-2. INITIALIZATION
-   ├─ Learnosity loads question.ts via AMD
-   ├─ Question class constructor called with init data
-   ├─ Question.render() creates DOM structure
-   ├─ Angular platform bootstrapped with noop zone
-   ├─ TemplateRendererComponent created using createComponent()
-   ├─ Component inputs set via setInput()
-   └─ Component attached to ApplicationRef
-
-3. RENDERING
-   ├─ TemplateRendererComponent.ngOnInit() called
-   ├─ parseTemplate() splits template by {{dropdown}}
-   ├─ templateParts array created with configs
-   ├─ Template renders with @for control flow
-   ├─ DropdownComponents created for each token
-   └─ Initial response values populated via @Input
-
-4. INTERACTION
-   ├─ Student clicks dropdown trigger button
-   ├─ DropdownComponent.toggleDropdown() sets isOpen = true
-   ├─ Dropdown options rendered with @if control flow
-   ├─ Student clicks option
-   ├─ DropdownComponent.selectOption(option) called
-   ├─ valueChange.emit(option) emits to parent
-   ├─ TemplateRendererComponent.onDropdownChange() updates state
-   ├─ dropdownChange.emit(updatedResponse) emits to Question class
-   ├─ Question.onValueChange() updates response
-   └─ Learnosity 'changed' event triggered
-
-5. VALIDATION
-   ├─ Student clicks "Check Answer"
-   ├─ Learnosity triggers 'validate' event
-   ├─ Question.showValidationUI() called
-   ├─ Scorer.isValid() checks response vs valid_response
-   ├─ Validation states calculated for each dropdown
-   ├─ componentRef.setInput('validationStates', states)
-   ├─ Change detection triggered manually
-   ├─ DropdownComponents receive validationState inputs
-   ├─ CSS classes applied (dropdown-correct / dropdown-incorrect)
-   └─ Suggested answers shown if incorrect
-```
-
-## Angular-Specific Features
-
-### 1. Standalone Components
-
-Modern Angular standalone components eliminate the need for NgModule:
-
+5. **effect()** - Side effects
 ```typescript
-@Component({
-  selector: 'app-dropdown',
-  standalone: true,  // Standalone component
-  imports: [CommonModule],  // Direct imports
-  templateUrl: './dropdown.component.html',
-  styleUrls: ['./dropdown.component.scss']
-})
+effect(() => {
+    const template = this.template();
+    this.parseTemplate(template);
+});
 ```
 
-**Benefits:**
-- Simpler architecture
-- Faster compilation
-- Better tree-shaking
-- No NgModule boilerplate
+### Why Signals?
 
-### 2. Modern Control Flow Syntax
+- **Fine-grained reactivity** - Only affected parts re-render
+- **Better performance** - No Zone.js overhead
+- **Simpler mental model** - Clear data dependencies
+- **Automatic tracking** - Effects track dependencies automatically
 
-Angular 17+ introduces new template syntax:
+## Modern Control Flow Syntax
 
+Angular 17+ introduces built-in control flow:
+
+### @if / @else
 ```html
-<!-- Old syntax -->
-<div *ngIf="isOpen">...</div>
-<div *ngFor="let item of items">...</div>
-
-<!-- New syntax -->
-@if (isOpen) {
-  <div>...</div>
+@if (isOpen()) {
+  <div>Open</div>
+} @else {
+  <div>Closed</div>
 }
-@for (item of items; track item) {
-  <div>...</div>
+```
+
+### @for
+```html
+@for (item of items(); track item) {
+  <li>{{ item }}</li>
 }
 ```
 
 **Benefits:**
 - Better performance
-- Improved type checking
-- More readable
-- Built into the framework
-
-### 3. Noop Zone for Performance
-
-Instead of using Zone.js change detection, we use noop zone and manual change detection:
-
-```typescript
-const moduleRef = await platform.bootstrapModule(
-    class { ngDoBootstrap() {} } as any,
-    { ngZone: 'noop' }  // Disable automatic change detection
-);
-
-// Manually trigger change detection when needed
-this.componentRef.changeDetectorRef.detectChanges();
-```
-
-**Benefits:**
-- Better performance (no automatic change detection overhead)
-- Full control over when updates occur
-- Suitable for embedded components
-
-### 4. Modern Component Creation API
-
-Using Angular's latest component creation APIs:
-
-```typescript
-import { createComponent, ApplicationRef, EnvironmentInjector } from '@angular/core';
-
-// Create component imperatively
-this.componentRef = createComponent(TemplateRendererComponent, {
-    environmentInjector: injector,
-    hostElement: container
-});
-
-// Set inputs dynamically
-this.componentRef.setInput('template', templateString);
-
-// Access instance and subscribe to outputs
-this.componentRef.instance.dropdownChange.subscribe(...);
-```
-
-### 5. Type Safety with TypeScript
-
-Strong typing throughout the codebase:
-
-```typescript
-interface InitOptions {
-  question: any;
-  response: any;
-  state: 'initial' | 'resume' | 'review';
-  $el: HTMLElement;
-  events: any;
-}
-
-interface ResponseValue {
-  value: {
-    [index: string]: string;
-  };
-}
-
-// Type-safe component inputs
-@Input() validationState: 'correct' | 'incorrect' | null = null;
-```
+- Better type checking
+- Cleaner syntax
+- Track required (forces you to think about performance)
 
 ## Styling Approach
 
-### Component-Scoped Styles
-
-Each component has its own SCSS file with `ViewEncapsulation.Emulated`:
+### Inline Templates + Separate SCSS Files
 
 ```typescript
 @Component({
-  styleUrls: ['./dropdown.component.scss'],
-  encapsulation: ViewEncapsulation.Emulated  // Default scoped styles
+  selector: 'app-dropdown',
+  standalone: true,
+  template: `
+    <div class="dropdown-container">
+      <!-- Inline HTML for easy reference -->
+    </div>
+  `,
+  styleUrl: './dropdown.component.scss'  // Separate SCSS for organization
 })
 ```
 
 **Benefits:**
-- Styles scoped to component
-- No global CSS conflicts
-- Maintainable and modular
+- **Inline Template**: See component structure immediately
+- **Separate Styles**: 
+  - Better organization for complex styling
+  - Full SCSS features (nesting, variables, mixins)
+  - Easier to maintain large stylesheets
+  - Component-scoped by default (no conflicts)
 
-### SCSS Structure
-
-```scss
-// _variables.scss
-$prefix: lrn-custom-question;
-
-// main.scss
-@import "variables";
-
-.lrn-custom-question {
-    @import "question";
-}
-
-.question-rendering-container {
-    padding-top: 50px;
-}
-```
-
-### Component-Specific Styles
+### Example SCSS (dropdown.component.scss)
 
 ```scss
-// dropdown.component.scss
 .dropdown-container {
   display: inline-block;
   position: relative;
-
-  &.dropdown-correct {
-    .dropdown-trigger {
-      border-color: #28a745;
-      background-color: #d4edda;
-    }
-  }
-
-  &.dropdown-incorrect {
-    .dropdown-trigger {
-      border-color: #dc3545;
-      background-color: #f8d7da;
-    }
-  }
 }
 
 .dropdown-trigger {
-  padding: 8px 32px 8px 12px;
-  border: 2px solid #ccc;
-  border-radius: 4px;
-  background-color: white;
-  cursor: pointer;
-  position: relative;
-  min-width: 80px;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
 
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  &:hover:not(:disabled) {
+    border-color: #999;
+  }
+
+  &.has-value {
+    font-weight: 500;
   }
 }
-```
 
-### CSS Prefix Convention
-
-All custom CSS uses the `lrn-custom-question` prefix to avoid conflicts:
-
-```typescript
-// constants.ts
-export const PREFIX = 'lrn-custom-question';
-```
-
-## Build System
-
-### Webpack Configuration
-
-**Entry Points:**
-```javascript
-entry: {
-    question: './src/question.ts',
-    scorer: './src/scorer.ts'
-}
-```
-
-**Output:**
-```javascript
-output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js'
-}
-```
-
-**Loaders:**
-
-1. **ts-loader** - Transpiles TypeScript
-   ```javascript
-   {
-       test: /\.ts$/,
-       use: 'ts-loader',
-       exclude: /node_modules/
-   }
-   ```
-
-2. **sass-loader + css-loader** - Processes SCSS
-   ```javascript
-   {
-       test: /\.scss$/,
-       use: [
-           MiniCssExtractPlugin.loader,
-           'css-loader',
-           'sass-loader'
-       ]
-   }
-   ```
-
-**Plugins:**
-- **MiniCssExtractPlugin** - Extracts CSS to separate file
-- **CopyWebpackPlugin** - Copies authoring_custom_layout.html to dist/
-
-### TypeScript Configuration
-
-```json
-{
-    "compilerOptions": {
-        "target": "ES2022",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "strict": true,
-        "skipLibCheck": true
-    }
-}
-```
-
-### NPM Scripts
-
-```json
-{
-    "dev": "webpack watch --mode development --devtool eval-source-map",
-    "build": "webpack --mode production",
-    "test": "jest",
-    "test:watch": "jest --watch"
-}
-```
-
-### Development Workflow
-
-1. **Start Dev Server:**
-   ```bash
-   npm run dev
-   ```
-   - Webpack watch mode with hot reload
-   - Source maps enabled for debugging
-
-2. **Make Changes:**
-   - Edit Angular components in `src/app/components/`
-   - Edit Question class in `src/app/question/index.ts`
-   - Edit styles in component SCSS files
-
-3. **Webpack Auto-Rebuilds:**
-   - Compiles TypeScript to JavaScript
-   - Bundles Angular components
-   - Extracts CSS
-   - Outputs to `dist/`
-
-4. **Test in Browser:**
-   - Navigate to your Learnosity test page
-   - Learnosity loads question from dist/
-
-## Testing
-
-### Jest Configuration
-
-```javascript
-// jest.config.js
-{
-    preset: 'ts-jest',
-    testEnvironment: 'jsdom',  // Simulates browser environment
-    moduleDirectories: ['node_modules', 'src'],
-    testMatch: ['**/*.spec.ts', '**/*.test.ts']
-}
-```
-
-### Example Test
-
-```typescript
-// question/index.spec.ts
-import Question from './index';
-
-describe('Question', () => {
-    let mockInit: any;
-    let mockLrnUtils: any;
-
-    beforeEach(() => {
-        mockInit = {
-            question: { custom_dropdown_template: 'Test {{dropdown}}' },
-            response: null,
-            state: 'initial',
-            $el: { get: () => document.createElement('div') },
-            events: { trigger: jest.fn(), on: jest.fn() }
-        };
-        mockLrnUtils = {};
-    });
-
-    it('should initialize correctly', () => {
-        const question = new Question(mockInit, mockLrnUtils);
-        expect(question).toBeDefined();
-    });
-
-    it('should create scorer', () => {
-        const question = new Question(mockInit, mockLrnUtils);
-        expect(question['scorer']).toBeDefined();
-    });
-});
-```
-
-## Learnosity Integration Points
-
-### AMD Module Pattern
-
-Both question.ts and scorer.ts use Learnosity's AMD pattern:
-
-```typescript
-declare const LearnosityAmd: any;
-
-LearnosityAmd.define([], function () {
-    return {
-        Question  // or Scorer
-    };
-});
-```
-
-This allows Learnosity to dynamically load and instantiate the custom question.
-
-### Question States
-
-**initial** - First time rendering
-```typescript
-if (this.state === 'initial') {
-    this.response = { value: {} };
-}
-```
-
-**resume** - Restoring previously saved response
-```typescript
-if (this.state === 'resume') {
-    this.response = this.question.response || { value: {} };
-}
-```
-
-**review** - Read-only view after submission
-```typescript
-if (this.state === 'review') {
-    this.isDisabled = true;
-}
-```
-
-### Learnosity Events
-
-**Triggering Events:**
-```typescript
-this.events.trigger('ready');        // Question fully loaded
-this.events.trigger('changed', response);  // Response changed
-```
-
-**Listening to Events:**
-```typescript
-this.events.on('validate', () => {
-    this.showValidationUI();
-});
-
-this.events.on('resetResponse', () => {
-    this.resetResponse();
-});
-```
-
-### Facade Methods (Public API)
-
-These methods are exposed to Learnosity's Items API:
-
-```typescript
-registerPublicMethods(): void {
-    this.facade = {
-        disable: () => this.disable(),
-        enable: () => this.enable(),
-        resetResponse: () => this.resetResponse(),
-        showValidationUI: () => this.showValidationUI(),
-        resetValidationUI: () => this.resetValidationUI(),
-        isValid: () => this.scorer.isValid()
-    };
-}
-```
-
-External code can call:
-```javascript
-itemsApp.question('question-id').disable();
-itemsApp.question('question-id').resetResponse();
-```
-
-### Validation UI
-
-Learnosity provides standard CSS classes for validation feedback:
-
-```typescript
-showValidationUI(): void {
-    const isCorrect = this.scorer.isValid();
-    const inputEl = this.el.querySelector(".lrn_response_input");
-
-    if (isCorrect) {
-        inputEl.classList.add("lrn_correct");
-        inputEl.classList.remove("lrn_incorrect");
-    } else {
-        inputEl.classList.add("lrn_incorrect");
-        inputEl.classList.remove("lrn_correct");
-    }
-
-    // Calculate individual dropdown validation states
-    const validationStates: { [key: string]: 'correct' | 'incorrect' } = {};
-    Object.entries(this.question.valid_response || {}).forEach(([index, validValue]) => {
-        const actualValue = this.response.value[index];
-        validationStates[index] = actualValue === validValue ? 'correct' : 'incorrect';
-    });
-
-    // Update component with validation states
-    this.renderComponent({ validationStates });
+.dropdown-correct {
+  .dropdown-trigger {
+    border-color: #4caf50;
+    background-color: #e8f5e9;
+  }
 }
 ```
 
 ## Key Takeaways
 
-### Angular Pattern Summary
+### Modern Angular Pattern Summary
 
-1. **Standalone Components** - Modern Angular architecture without NgModules
-2. **Component Creation API** - Imperative component creation for embedding
-3. **TypeScript Type Safety** - Strong typing throughout the codebase
-4. **Manual Change Detection** - Noop zone with manual detectChanges() for performance
-5. **Modern Template Syntax** - @if/@for control flow (Angular 17+)
-6. **Component-Scoped Styles** - ViewEncapsulation for modular CSS
-7. **Dependency Injection** - ElementRef, DomSanitizer, etc.
+1. **Signals Everywhere** - input(), output(), signal(), computed(), effect()
+2. **No Decorators for I/O** - input()/output() instead of @Input()/@Output()
+3. **Reactive by Default** - Signals provide automatic reactivity
+4. **Modern Control Flow** - @if/@for instead of *ngIf/*ngFor
+5. **Hybrid Approach** - Inline templates + separate SCSS files
+6. **No NgModules** - Standalone components only
+7. **Type Safety** - Full TypeScript throughout
 
 ### Architecture Highlights
 
 1. **Separation of Concerns**
    - Question class = Controller (TypeScript)
-   - TemplateRendererComponent = View logic (Angular)
-   - DropdownComponent = Reusable UI component (Angular)
+   - TemplateRendererComponent = View logic (Angular + Signals)
+   - DropdownComponent = Reusable UI (Angular + Signals)
    - Scorer = Validation logic (TypeScript)
 
-2. **Template Token System**
-   - Simple `{{dropdown}}` parsing
-   - Flexible positioning in HTML
-   - Index-based configuration mapping
-   - Type-safe TemplatePart interface
+2. **Reactive Template System**
+   - Signals for reactive updates
+   - Effects for side effects
+   - Computed for derived values
+   - Automatic dependency tracking
 
-3. **Learnosity Compatibility**
-   - AMD module pattern
-   - Event-driven architecture
-   - Standard validation UI
-   - Facade pattern for public API
+### Differences from Traditional Angular
 
-4. **Modern Build Pipeline**
-   - Webpack 5 for bundling
-   - TypeScript 5.6 for type safety
-   - SCSS for styling
-   - Jest for testing
-
-### Differences from React Version
-
-| Aspect | React Version | Angular Version |
-|--------|---------------|-----------------|
-| **Framework** | React 19 | Angular 20 Standalone |
-| **Language** | JavaScript (ES6+) | TypeScript |
-| **Module System** | ES Modules | ES Modules + TypeScript |
-| **Components** | Functional + Hooks | Class-based + Decorators |
-| **State Management** | useState hook | Component properties |
-| **Change Detection** | Automatic re-render | Manual detectChanges() |
-| **Template Syntax** | JSX | HTML with directives |
-| **Styling** | Inline styles | Component-scoped SCSS |
-| **Build Tool** | Babel + Webpack | TypeScript + Webpack |
-| **Type Safety** | Optional (PropTypes) | Built-in (TypeScript) |
-
-### Best Practices Demonstrated
-
-- Clean component composition
-- Standalone component architecture
-- Lifecycle hook usage (OnInit, OnChanges)
-- Type-safe interfaces and decorators
-- Input/Output event communication
-- @HostListener for DOM events
-- DomSanitizer for secure HTML rendering
-- Manual change detection for performance
-- Component-scoped styling
-- Immutable state updates
-- Modern template control flow
-
----
+| Aspect | Old Angular | Modern Angular (This Project) |
+|--------|-------------|-------------------------------|
+| **Inputs** | @Input() decorator | input() signal |
+| **Outputs** | @Output() EventEmitter | output() |
+| **State** | Class properties | signal() |
+| **Derived** | Getters/methods | computed() |
+| **Side Effects** | ngOnInit/ngOnChanges | effect() |
+| **Templates** | *ngIf/*ngFor | @if/@for |
+| **Template Location** | Separate .html | Inline in .ts |
+| **Styles Location** | Separate .scss | Separate .scss (styleUrl) |
+| **Modules** | NgModule | Standalone |
+| **Change Detection** | Zone.js | Noop zone + manual |
 
 ## Quick Reference
-
-### File Locations
-
-| Purpose | Path |
-|---------|------|
-| Main Question Logic | `src/app/question/index.ts` |
-| Template Parser | `src/app/components/template-renderer/template-renderer.component.ts` |
-| Dropdown UI | `src/app/components/dropdown/dropdown.component.ts` |
-| Validation Logic | `src/app/scorer/index.ts` |
-| Constants | `src/app/constants.ts` |
-| Question Config | `question.json` |
-| Editor Schema | `question_editor_init_options.json` |
-| Authoring UI | `authoring_custom_layout.html` |
-| Build Output | `dist/` |
 
 ### Command Reference
 
@@ -1131,40 +542,63 @@ npm run build
 
 # Run tests
 npm run test
-
-# Watch tests
-npm run test:watch
 ```
 
-### Component Hierarchy
-
-```
-Question (Vanilla TypeScript)
-  └─ Angular Platform (noop zone)
-      └─ TemplateRendererComponent (Standalone)
-          ├─ DropdownComponent #1 (Standalone)
-          ├─ DropdownComponent #2 (Standalone)
-          └─ DropdownComponent #n (Standalone)
-```
-
-### Key Angular APIs Used
+### Signal Cheat Sheet
 
 ```typescript
-// Component creation
-import { createComponent, ApplicationRef, EnvironmentInjector } from '@angular/core';
+// Input signals (replaces @Input)
+value = input<string>('default');           // optional with default
+required = input.required<string>();        // required
 
-// Platform bootstrap
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+// Output (replaces @Output)
+change = output<string>();                  // emit with: this.change.emit(value)
 
-// Component decorators
-import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
+// Writable signals
+count = signal(0);                          // create
+count()                                     // read
+count.set(5)                                // write
+count.update(n => n + 1)                    // update
 
-// Lifecycle hooks
-import { OnInit, OnChanges, SimpleChanges } from '@angular/core';
+// Computed signals
+doubled = computed(() => this.count() * 2); // auto-updates
 
-// Common directives
-import { CommonModule } from '@angular/common';
+// Effects
+effect(() => {
+    console.log(this.count());              // runs when count changes
+});
+```
 
-// Security
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+### Component Template Pattern
+
+```typescript
+@Component({
+  selector: 'app-example',
+  standalone: true,
+  template: `
+    <div class="container">
+      @if (show()) {
+        <p>{{ message() }}</p>
+      }
+      
+      @for (item of items(); track item.id) {
+        <div>{{ item.name }}</div>
+      }
+    </div>
+  `,
+  styleUrl: './example.component.scss'
+})
+export class ExampleComponent {
+  show = input(true);
+  message = input.required<string>();
+  items = signal<Item[]>([]);
+  
+  computed = computed(() => this.items().length);
+  
+  constructor() {
+    effect(() => {
+      console.log('Items changed:', this.items());
+    });
+  }
+}
 ```

@@ -32,7 +32,6 @@
     font-weight: 500;
   }
 
-  // Arrow indicator
   &::after {
     content: '▼';
     position: absolute;
@@ -82,7 +81,6 @@
   }
 }
 
-// Validation states
 .dropdown-correct {
   .dropdown-trigger {
     border-color: #4caf50;

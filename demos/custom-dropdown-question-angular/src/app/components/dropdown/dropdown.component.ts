@@ -1,100 +1,89 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
   HostListener,
   ElementRef,
-  ViewEncapsulation
+  signal,
+  input,
+  output,
+  computed
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
-/**
- * DropdownComponent
- *
- * A custom standalone dropdown component for selecting options.
- * Features:
- * - Click-outside detection to close dropdown
- * - Fully controlled component (value managed by parent)
- * - Keyboard-friendly
- * - Component-scoped styling
- * - Validation state support
- */
 @Component({
   selector: 'app-dropdown',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './dropdown.component.html',
-  styleUrls: ['./dropdown.component.scss'],
-  encapsulation: ViewEncapsulation.Emulated
+  template: `
+    <div class="dropdown-container" [class]="validationClass()">
+      <button
+        class="dropdown-trigger"
+        [class.has-value]="value() !== undefined"
+        [disabled]="isDisabled()"
+        (click)="toggleDropdown()"
+        type="button"
+      >
+        {{ displayValue() }}
+      </button>
+
+      @if (isOpen()) {
+        <ul class="dropdown-options">
+          @for (option of options(); track option) {
+            <li
+              class="dropdown-option"
+              [class.selected]="isSelected(option)"
+              (click)="selectOption(option)"
+            >
+              {{ option }}
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  `,
+  styleUrl: './dropdown.component.scss'
 })
 export class DropdownComponent {
-  @Input() value: string | undefined;
-  @Input() options: string[] = [];
-  @Input() placeholder: string = '?';
-  @Input() isDisabled: boolean = false;
-  @Input() validationState: 'correct' | 'incorrect' | null = null;
+  value = input<string | undefined>(undefined);
+  options = input<string[]>([]);
+  placeholder = input<string>('?');
+  isDisabled = input<boolean>(false);
+  validationState = input<'correct' | 'incorrect' | null>(null);
 
-  @Output() valueChange = new EventEmitter<string>();
+  valueChange = output<string>();
 
-  isOpen: boolean = false;
+  isOpen = signal(false);
+
+  displayValue = computed(() => {
+    const val = this.value();
+    return val !== undefined ? val : this.placeholder();
+  });
+
+  validationClass = computed(() => {
+    const state = this.validationState();
+    if (state === 'correct') return 'dropdown-correct';
+    if (state === 'incorrect') return 'dropdown-incorrect';
+    return '';
+  });
 
   constructor(private elementRef: ElementRef) {}
 
-  /**
-   * Toggle dropdown open/close state
-   */
   toggleDropdown(): void {
-    if (!this.isDisabled) {
-      this.isOpen = !this.isOpen;
+    if (!this.isDisabled()) {
+      this.isOpen.set(!this.isOpen());
     }
   }
 
-  /**
-   * Handle option selection
-   * @param option - The selected option value
-   */
   selectOption(option: string): void {
-    this.value = option;
     this.valueChange.emit(option);
-    this.isOpen = false;
+    this.isOpen.set(false);
   }
 
-  /**
-   * Close dropdown when clicking outside
-   * @param event - The click event
-   */
   @HostListener('document:mousedown', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.isOpen = false;
+      this.isOpen.set(false);
     }
   }
 
-  /**
-   * Get the display value (selected value or placeholder)
-   */
-  get displayValue(): string {
-    return this.value !== undefined ? this.value : this.placeholder;
-  }
-
-  /**
-   * Check if an option is currently selected
-   * @param option - The option to check
-   */
   isSelected(option: string): boolean {
-    return this.value === option;
-  }
-
-  /**
-   * Get CSS classes for validation state
-   */
-  get validationClass(): string {
-    if (this.validationState === 'correct') {
-      return 'dropdown-correct';
-    } else if (this.validationState === 'incorrect') {
-      return 'dropdown-incorrect';
-    }
-    return '';
+    return this.value() === option;
   }
 }
