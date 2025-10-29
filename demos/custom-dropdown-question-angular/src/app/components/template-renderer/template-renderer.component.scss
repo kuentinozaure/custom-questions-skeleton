@@ -1,0 +1,26 @@
+.template-renderer {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+
+  // Ensure inline rendering of HTML parts and dropdowns
+  span {
+    display: inline;
+  }
+
+  // Style for any HTML content within the template
+  :host ::ng-deep {
+    p {
+      margin: 0;
+      display: inline;
+    }
+
+    strong {
+      font-weight: 600;
+    }
+
+    em {
+      font-style: italic;
+    }
+  }
+}

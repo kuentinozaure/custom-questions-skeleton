@@ -1,0 +1,15 @@
+/**
+ * Main Stylesheet
+ * Entry point for all SCSS imports
+ */
+
+@import 'variables';
+
+.lrn-custom-question {
+    @import 'question';
+}
+
+// Global styles for question rendering container
+.question-rendering-container {
+    padding-top: 50px;
+}

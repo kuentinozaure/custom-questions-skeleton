@@ -1,0 +1,35 @@
+/**
+ * SCSS Variables
+ * Define global variables for consistent styling
+ */
+
+$prefix: lrn-custom-question-;
+
+// Colors
+$primary-color: #1976d2;
+$success-color: #4caf50;
+$error-color: #f44336;
+$border-color: #ccc;
+$hover-border-color: #999;
+$background-color: #fff;
+$hover-background-color: #f8f8f8;
+$disabled-background-color: #f5f5f5;
+
+// Spacing
+$padding-sm: 4px;
+$padding-md: 8px;
+$padding-lg: 16px;
+
+// Border radius
+$border-radius: 4px;
+
+// Typography
+$font-size-base: 14px;
+$font-size-lg: 16px;
+$line-height-base: 1.6;
+
+// Z-index
+$z-index-dropdown: 1000;
+
+// Transitions
+$transition-speed: 0.2s;
