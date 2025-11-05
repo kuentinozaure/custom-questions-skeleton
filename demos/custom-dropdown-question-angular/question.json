@@ -1,15 +1,25 @@
-
 {
-    "type": "custom",
-    "stimulus": "Stimulus of the custom question here.",
-    "valid_response": "The valid response of your custom question here can be any data type.",
-    "yourCustomProperty": "yourCustomValue",
-    "yourCustomProperty2": "yourCustomValue2",
-    "yourCustomProperty3": "yourCustomValue3",
-    "js": {
-        "question": "/dist/question.js",
-        "scorer": "/dist/scorer.js"
+  "type": "custom",
+  "stimulus": "Complete the following sentences by selecting the appropriate words from the dropdowns.",
+  "custom_dropdown_template": "The capital of France is {{dropdown}} and it has a population of over {{dropdown}} million people.",
+  "dropdown_configs": [
+    {
+      "placeholder": "Select city",
+      "options": ["Paris", "Lyon", "Marseille", "Nice"]
     },
-    "css": "/dist/question.css",
-    "instant_feedback": true
+    {
+      "placeholder": "Select number",
+      "options": ["2", "5", "10", "15"]
+    }
+  ],
+  "valid_response": {
+    "0": "Paris",
+    "1": "2"
+  },
+  "js": {
+    "question": "/dist/question.js",
+    "scorer": "/dist/scorer.js"
+  },
+  "css": "/dist/question.css",
+  "instant_feedback": true
 }
