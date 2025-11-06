@@ -1,16 +1,17 @@
 import {
   Component,
-  input,
-  output,
+  Input,
+  Output,
+  EventEmitter,
   signal,
-  effect
+  effect,
+  OnInit
 } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { DropdownComponent } from '../dropdown/dropdown.component';
 import { DropdownConfig, QuestionData, ResponseValue, ValidationStates } from "../../typees/question-types";
 
 interface TemplatePart {
-  htmlContent: SafeHtml;
+  htmlContent: string;
   dropdownConfig?: DropdownConfig;
   dropdownIndex?: number;
   isLastPart: boolean;
@@ -20,6 +21,7 @@ interface TemplatePart {
   selector: 'app-template-renderer',
   standalone: true,
   imports: [DropdownComponent],
+  providers: [],
   template: `
     <div class="template-renderer">
       @for (part of templateParts(); track $index) {
@@ -30,7 +32,7 @@ interface TemplatePart {
             [value]="getDropdownValue(part.dropdownIndex)"
             [options]="part.dropdownConfig.options"
             [placeholder]="part.dropdownConfig.placeholder || '?'"
-            [isDisabled]="isDisabled()"
+            [isDisabled]="isDisabled"
             [validationState]="getValidationState(part.dropdownIndex)"
             (valueChange)="onDropdownChange($event, part.dropdownIndex)"
           />
@@ -38,31 +40,48 @@ interface TemplatePart {
       }
     </div>
   `,
-  styleUrl: './template-renderer.component.scss'
+  styles: [`
+    .template-renderer {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333;
+    }
+    
+    .template-renderer span {
+      display: inline;
+    }
+    
+    .template-renderer p {
+      margin: 0;
+      display: inline;
+    }
+    
+    .template-renderer strong {
+      font-weight: 600;
+    }
+    
+    .template-renderer em {
+      font-style: italic;
+    }
+  `]
 })
-export class TemplateRendererComponent {
-  template = input<string>('');
-  question = input.required<QuestionData>();
-  responseValue = input<ResponseValue>({});
-  isDisabled = input<boolean>(false);
-  validationStates = input<ValidationStates>({});
+export class TemplateRendererComponent implements OnInit {
+  @Input() template: string = '';
+  @Input() question!: QuestionData;
+  @Input() responseValue: ResponseValue = {};
+  @Input() isDisabled: boolean = false;
+  @Input() validationStates: ValidationStates = {};
 
-  dropdownChange = output<ResponseValue>();
+  @Output() dropdownChange = new EventEmitter<ResponseValue>();
 
   currentResponse = signal<ResponseValue>({});
   templateParts = signal<TemplatePart[]>([]);
 
-  constructor(private sanitizer: DomSanitizer) {
-    effect(() => {
-      const templateValue = this.template();
-      const questionValue = this.question();
-      this.parseTemplate(templateValue, questionValue);
-    });
+  constructor() {}
 
-    effect(() => {
-      const response = this.responseValue();
-      this.currentResponse.set({ ...response });
-    });
+  ngOnInit() {
+    this.parseTemplate(this.template, this.question);
+    this.currentResponse.set({ ...this.responseValue });
   }
 
   private parseTemplate(templateStr: string, questionData: QuestionData): void {
@@ -95,8 +114,17 @@ export class TemplateRendererComponent {
     this.templateParts.set(parsedParts);
   }
 
-  private sanitizeHtml(html: string): SafeHtml {
-    return this.sanitizer.sanitize(1, html) || '';
+  private sanitizeHtml(html: string): string {
+    // Simple HTML sanitization - remove potentially dangerous content
+    if (typeof html !== 'string') {
+      return '';
+    }
+    
+    return html
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/on\w+="[^"]*"/g, '')
+      .replace(/on\w+='[^']*'/g, '')
+      .replace(/javascript:/gi, '');
   }
 
   onDropdownChange(value: string, index: number): void {
@@ -113,6 +141,6 @@ export class TemplateRendererComponent {
   }
 
   getValidationState(index: number): 'correct' | 'incorrect' | null {
-    return this.validationStates()[index] || null;
+    return this.validationStates[index] || null;
   }
 }

@@ -38,7 +38,69 @@ import {
       }
     </div>
   `,
-  styleUrl: './dropdown.component.scss'
+  styles: [`
+    .dropdown-container {
+      display: inline-block;
+      position: relative;
+      vertical-align: middle;
+      margin: 0 4px;
+    }
+    
+    .dropdown-trigger {
+      min-width: 60px;
+      padding: 6px 28px 6px 12px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      text-align: center;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    .dropdown-trigger:hover:not(:disabled) {
+      border-color: #999;
+    }
+    
+    .dropdown-trigger:disabled {
+      background-color: #f5f5f5;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    .dropdown-options {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      z-index: 1000;
+      max-height: 200px;
+      overflow-y: auto;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .dropdown-option {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .dropdown-option:hover {
+      background-color: #f0f0f0;
+    }
+    
+    .dropdown-option.selected {
+      background-color: #e6f3ff;
+    }
+  `]
 })
 export class DropdownComponent {
   value = input<string | undefined>(undefined);
