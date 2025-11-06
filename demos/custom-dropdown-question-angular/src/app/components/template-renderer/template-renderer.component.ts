@@ -8,6 +8,7 @@ import {
   effect,
   Inject,
   inject,
+  OnChanges,
 } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { DropdownComponent } from "../dropdown/dropdown.component";
@@ -76,8 +77,8 @@ interface TemplatePart {
     `,
   ],
 })
-export class TemplateRendererComponent {
-  template = input<string>("");
+export class TemplateRendererComponent implements OnChanges {
+  template = input<string>("{{dropdown}}{{dropdown}}{{dropdown}}{{dropdown}}");
   question = input<any>(); //input<QuestionData>();
   responseValue = input<ResponseValue>({});
   isDisabled = input<boolean>(false);
@@ -91,6 +92,7 @@ export class TemplateRendererComponent {
   sanitizer = inject(DomSanitizer);
 
   constructor() {
+    console.log("TemplateRendererComponent initialized");
     effect(() => {
       const templateValue = this.template();
       const questionValue = this.question();
@@ -101,6 +103,10 @@ export class TemplateRendererComponent {
       const response = this.responseValue();
       this.currentResponse.set({ ...response });
     });
+  }
+
+  ngOnChanges(): void {
+    console.log("ngOnChanges called with template:", this.template());
   }
 
   private parseTemplate(templateStr: string, questionData: QuestionData): void {

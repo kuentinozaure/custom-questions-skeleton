@@ -8,6 +8,7 @@ import {
   input,
   output,
   computed,
+  inject,
 } from "@angular/core";
 
 @Component({
@@ -152,6 +153,8 @@ export class DropdownComponent {
 
   isOpen = signal(false);
 
+  private elementRef: ElementRef = inject(ElementRef);
+
   displayValue = computed(() => {
     const val = this.value();
     return val !== undefined ? val : this.placeholder();
@@ -164,7 +167,7 @@ export class DropdownComponent {
     return "";
   });
 
-  constructor(private elementRef: ElementRef) {}
+  constructor() {}
 
   toggleDropdown(): void {
     if (!this.isDisabled()) {

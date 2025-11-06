@@ -142,17 +142,6 @@ export default class Question {
 
     await this.renderComponent(container);
 
-    // Append the custom element renderer-widget to the container
-    const rendererWidget = document.createElement(
-      "renderer-widget"
-    ) as NgElement &
-      WithProperties<{ question: any; responseValue: any; template: string }>;
-    rendererWidget.question = question;
-    rendererWidget.responseValue = response || {};
-    rendererWidget.template = template;
-
-    container.appendChild(rendererWidget);
-
     return Promise.all([
       lrnUtils.renderComponent(
         "SuggestedAnswersList",
@@ -164,6 +153,29 @@ export default class Question {
       ),
     ]).then(([suggestedAnswersList]) => {
       this.suggestedAnswersList = suggestedAnswersList;
+
+      // Append the custom element renderer-widget to the container
+      const rendererWidget = document.createElement(
+        "renderer-widget"
+      ) as NgElement &
+        WithProperties<{ question: any; responseValue: any; template: string }>;
+
+      const container = el.querySelector(".question-rendering-container") as
+        | HTMLElement
+        | undefined;
+
+      if (!container) {
+        throw new Error("Question rendering container not found in DOM.");
+      }
+
+      container.appendChild(rendererWidget);
+
+      rendererWidget.question = question;
+      rendererWidget.responseValue = response || {};
+      rendererWidget.template =
+        question.custom_dropdown_template ||
+        "{{dropdown}}{{dropdown}}{{dropdown}}{{dropdown}}";
+      container.appendChild(rendererWidget);
     });
   }
 
@@ -188,7 +200,6 @@ export default class Question {
         const TemplateRendererElement = createCustomElement(
           TemplateRendererComponent,
           {
-            // L'injecteur du runtime créé ci-dessus est passé à l'élément.
             injector: app.injector,
           }
         );
