@@ -78,7 +78,7 @@ interface TemplatePart {
   ],
 })
 export class TemplateRendererComponent implements OnChanges {
-  template = input<string>("{{dropdown}}{{dropdown}}{{dropdown}}{{dropdown}}");
+  template = input<string>("{{dropdown}}");
   question = input<any>(); //input<QuestionData>();
   responseValue = input<ResponseValue>({});
   isDisabled = input<boolean>(false);

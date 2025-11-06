@@ -175,7 +175,10 @@ export default class Question {
       rendererWidget.template =
         question.custom_dropdown_template ||
         "{{dropdown}}{{dropdown}}{{dropdown}}{{dropdown}}";
+
       container.appendChild(rendererWidget);
+
+      // setTimeout(() =>)
     });
   }
 
