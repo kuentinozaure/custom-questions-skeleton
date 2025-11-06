@@ -45,7 +45,7 @@ interface InitOptions {
   [key: string]: any;
 }
 
-const ELEMENT_NAME = "renderer-widget";
+const ELEMENT_NAME = "app-template-renderer";
 
 export default class Question {
   private init: InitOptions;
@@ -153,32 +153,6 @@ export default class Question {
       ),
     ]).then(([suggestedAnswersList]) => {
       this.suggestedAnswersList = suggestedAnswersList;
-
-      // Append the custom element renderer-widget to the container
-      const rendererWidget = document.createElement(
-        "renderer-widget"
-      ) as NgElement &
-        WithProperties<{ question: any; responseValue: any; template: string }>;
-
-      const container = el.querySelector(".question-rendering-container") as
-        | HTMLElement
-        | undefined;
-
-      if (!container) {
-        throw new Error("Question rendering container not found in DOM.");
-      }
-
-      container.appendChild(rendererWidget);
-
-      rendererWidget.question = question;
-      rendererWidget.responseValue = response || {};
-      rendererWidget.template =
-        question.custom_dropdown_template ||
-        "{{dropdown}}{{dropdown}}{{dropdown}}{{dropdown}}";
-
-      container.appendChild(rendererWidget);
-
-      // setTimeout(() =>)
     });
   }
 
@@ -189,33 +163,42 @@ export default class Question {
     const template = question.custom_dropdown_template || "";
 
     try {
-      (async () => {
-        // --- L'étape OBLIGATOIRE du "runtime" Angular ---
-        // Cette étape crée l'injecteur minimal nécessaire. Ce n'est PAS une application visible.
-        const app = await createApplication({
-          providers: [
-            provideZonelessChangeDetection(),
-            provideClientHydration(),
-          ],
-        });
+      // --- L'étape OBLIGATOIRE du "runtime" Angular ---
+      // Cette étape crée l'injecteur minimal nécessaire. Ce n'est PAS une application visible.
+      const app = await createApplication({
+        providers: [provideZonelessChangeDetection(), provideClientHydration()],
+      });
 
-        // 2. Créez la classe du Web Component
-        const TemplateRendererElement = createCustomElement(
-          TemplateRendererComponent,
-          {
-            injector: app.injector,
-          }
-        );
-
-        if (!customElements.get(ELEMENT_NAME)) {
-          customElements.define(ELEMENT_NAME, TemplateRendererElement);
-
-          console.log(
-            `Widget Angular '${ELEMENT_NAME}' prêt à être utilisé dans la page hôte (PHP/JS).`
-          );
+      // 2. Créez la classe du Web Component
+      const TemplateRendererElement = createCustomElement(
+        TemplateRendererComponent,
+        {
+          injector: app.injector,
         }
-      })();
+      );
 
+      if (!customElements.get(ELEMENT_NAME)) {
+        customElements.define(ELEMENT_NAME, TemplateRendererElement);
+
+        console.log(
+          `Widget Angular '${ELEMENT_NAME}' prêt à être utilisé dans la page hôte (PHP/JS).`
+        );
+      }
+
+      // https://angular.dev/guide/elements#example-1
+      // PopupService
+      const templateRenderer: NgElement &
+        WithProperties<TemplateRendererComponent> = document.createElement(
+        ELEMENT_NAME
+      ) as any;
+
+      templateRenderer.question = question;
+      templateRenderer.responseValue = response || {};
+      templateRenderer.template = template;
+
+      container.appendChild(templateRenderer);
+
+      // CODE BEFORE THE CUSTOM ELEMENTS INVESTIGATION
       // // Create minimal environment injector without application context
       // this.environmentInjector = createEnvironmentInjector(
       //   [

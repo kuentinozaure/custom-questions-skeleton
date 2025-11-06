@@ -78,7 +78,7 @@ interface TemplatePart {
   ],
 })
 export class TemplateRendererComponent implements OnChanges {
-  template = input<string>("{{dropdown}}");
+  template = input<string>("");
   question = input<any>(); //input<QuestionData>();
   responseValue = input<ResponseValue>({});
   isDisabled = input<boolean>(false);
@@ -93,6 +93,7 @@ export class TemplateRendererComponent implements OnChanges {
 
   constructor() {
     console.log("TemplateRendererComponent initialized");
+    console.log("Initial template:", this.template());
     effect(() => {
       const templateValue = this.template();
       const questionValue = this.question();
