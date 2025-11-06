@@ -169,6 +169,13 @@
   dependencies:
     tslib "^2.3.0"
 
+"@angular/elements@^20.3.10":
+  version "20.3.10"
+  resolved "https://registry.yarnpkg.com/@angular/elements/-/elements-20.3.10.tgz#6b344f0862b850a8514e231208b28e7ac632cb30"
+  integrity sha512-8xqd3v/e0oNPZFt35OdrXU61a4ughsNjjRgc+j9eD4u4KpLggTMBKW26hh2c6nAnqhZcH3eX6qLBx0wU3zN95w==
+  dependencies:
+    tslib "^2.3.0"
+
 "@angular/platform-browser@^20.0.0":
   version "20.3.9"
   resolved "https://registry.yarnpkg.com/@angular/platform-browser/-/platform-browser-20.3.9.tgz#da0534b33d579e0815fab66cb444551f9c42c710"
