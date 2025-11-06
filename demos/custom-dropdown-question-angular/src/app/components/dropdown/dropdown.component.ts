@@ -148,7 +148,7 @@ export class DropdownComponent {
   @Input() options: string[] = [];
   @Input() placeholder: string = "?";
   @Input() isDisabled: boolean = false;
-  validationState = input<"correct" | "incorrect" | null>(null);
+  @Input() validationState: "correct" | "incorrect" | null = null;
 
   valueChange = output<string>();
 
@@ -162,7 +162,7 @@ export class DropdownComponent {
   });
 
   validationClass = computed(() => {
-    const state = this.validationState();
+    const state = this.validationState;
     if (state === "correct") return "dropdown-correct";
     if (state === "incorrect") return "dropdown-incorrect";
     return "";
