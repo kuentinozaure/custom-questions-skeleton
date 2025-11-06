@@ -5,7 +5,6 @@ import {
   HostListener,
   ElementRef,
   signal,
-  input,
   output,
   computed,
   inject,

@@ -6,9 +6,7 @@ import {
   output,
   signal,
   effect,
-  Inject,
   inject,
-  OnChanges,
   Input,
 } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
@@ -78,7 +76,7 @@ interface TemplatePart {
     `,
   ],
 })
-export class TemplateRendererComponent implements OnChanges {
+export class TemplateRendererComponent {
   // template = input<string>("");
 
   @Input() template: string = "";
@@ -95,8 +93,6 @@ export class TemplateRendererComponent implements OnChanges {
   sanitizer = inject(DomSanitizer);
 
   constructor() {
-    console.log("TemplateRendererComponent initialized");
-    console.log("Initial template:", this.template);
     effect(() => {
       if (this.question !== null) {
         const templateValue = this.template;
@@ -109,10 +105,6 @@ export class TemplateRendererComponent implements OnChanges {
       const response = this.responseValue;
       this.currentResponse.set({ ...response });
     });
-  }
-
-  ngOnChanges(): void {
-    console.log("ngOnChanges called with template:", this.template);
   }
 
   private parseTemplate(templateStr: string, questionData: QuestionData): void {

@@ -14,7 +14,6 @@ import {
   EnvironmentInjector,
   Injector,
 } from "@angular/core";
-import { DOCUMENT } from "@angular/common";
 import { TemplateRendererComponent } from "../components/template-renderer/template-renderer.component";
 import { PREFIX } from "../constants";
 import "../../styles/main.scss";
@@ -27,10 +26,7 @@ import {
   NgElement,
   WithProperties,
 } from "@angular/elements";
-import {
-  provideZoneChangeDetection,
-  provideZonelessChangeDetection,
-} from "@angular/core";
+import { provideZonelessChangeDetection } from "@angular/core";
 
 interface LrnUtils {
   [key: string]: any;
@@ -53,9 +49,10 @@ export default class Question {
   private events: any;
   private lrnUtils: LrnUtils;
   private el: HTMLElement;
-  private componentRef: ComponentRef<TemplateRendererComponent> | null = null;
-  private environmentInjector: EnvironmentInjector | null = null;
-  private suggestedAnswersList: any;
+  // Removed with the custom elements implementation
+  // private componentRef: ComponentRef<TemplateRendererComponent> | null = null;
+  // private environmentInjector: EnvironmentInjector | null = null;
+  // private suggestedAnswersList: any;
 
   constructor(init: InitOptions, lrnUtils: LrnUtils) {
     this.init = init;
@@ -153,7 +150,9 @@ export default class Question {
         el.querySelector(`.${PREFIX}-checkAnswer-wrapper`)
       ),
     ]).then(([suggestedAnswersList]) => {
-      this.suggestedAnswersList = suggestedAnswersList;
+      // Fix this
+      // commented to avoid push with error
+      // this.suggestedAnswersList = suggestedAnswersList;
     });
   }
 
@@ -164,23 +163,14 @@ export default class Question {
     const template = question.custom_dropdown_template || "";
 
     try {
-      // --- L'étape OBLIGATOIRE du "runtime" Angular ---
-      // Cette étape crée l'injecteur minimal nécessaire. Ce n'est PAS une application visible.
       const app = await createApplication({
-        providers: [
-          provideZonelessChangeDetection(),
-          provideClientHydration(),
-          // Vous pouvez ajouter d'autres providers ici si nécessaire
-          // Pas besoin de fournir Injector explicitement, il est automatiquement disponible
-        ],
+        providers: [provideZonelessChangeDetection(), provideClientHydration()],
       });
 
-      // 2. Créez la classe du Web Component
-      // L'injector de l'application contient tous les providers nécessaires (DomSanitizer, etc.)
       const TemplateRendererElement = createCustomElement(
         TemplateRendererComponent,
         {
-          injector: app.injector, // Cet injector contient déjà tous les providers, y compris lui-même
+          injector: app.injector,
         }
       );
 
@@ -188,8 +178,8 @@ export default class Question {
         customElements.define(ELEMENT_NAME, TemplateRendererElement);
       }
 
-      // https://angular.dev/guide/elements#example-1
-      // PopupService
+      // Logic getting from https://angular.dev/guide/elements#example-1 > PopupService
+      // working example : https://stackblitz.com/edit/angular-elements-tutorial?file=src%2Fapp%2Fapp.component.ts
       const templateRenderer: NgElement &
         WithProperties<TemplateRendererComponent> = document.createElement(
         ELEMENT_NAME
@@ -200,20 +190,6 @@ export default class Question {
       templateRenderer.template = template;
 
       container.appendChild(templateRenderer);
-
-      // Attendre le prochain tick pour que l'élément soit complètement initialisé
-      requestAnimationFrame(() => {
-        // Maintenant définir les propriétés
-        templateRenderer.question = question;
-        templateRenderer.responseValue = response || {};
-        templateRenderer.template = template;
-
-        console.log("Propriétés définies sur le custom element:", {
-          question: templateRenderer.question,
-          responseValue: templateRenderer.responseValue,
-          template: templateRenderer.template,
-        });
-      });
 
       // CODE BEFORE THE CUSTOM ELEMENTS INVESTIGATION
       // // Create minimal environment injector without application context
