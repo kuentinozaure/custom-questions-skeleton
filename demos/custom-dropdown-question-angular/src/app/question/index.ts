@@ -21,7 +21,11 @@ import {
   createApplication,
   provideClientHydration,
 } from "@angular/platform-browser";
-import { createCustomElement } from "@angular/elements";
+import {
+  createCustomElement,
+  NgElement,
+  WithProperties,
+} from "@angular/elements";
 import {
   provideZoneChangeDetection,
   provideZonelessChangeDetection,
@@ -139,7 +143,10 @@ export default class Question {
     await this.renderComponent(container);
 
     // Append the custom element renderer-widget to the container
-    const rendererWidget = document.createElement("renderer-widget") as any;
+    const rendererWidget = document.createElement(
+      "renderer-widget"
+    ) as NgElement &
+      WithProperties<{ question: any; responseValue: any; template: string }>;
     rendererWidget.question = question;
     rendererWidget.responseValue = response || {};
     rendererWidget.template = template;

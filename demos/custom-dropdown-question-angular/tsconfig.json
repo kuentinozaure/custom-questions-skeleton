@@ -1,6 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "emitDecoratorMetadata": true,
     "outDir": "./dist",
     "baseUrl": "src",
     "sourceMap": true,
