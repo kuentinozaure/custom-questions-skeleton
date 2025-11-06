@@ -9,6 +9,7 @@ import {
   Inject,
   inject,
   OnChanges,
+  Input,
 } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { DropdownComponent } from "../dropdown/dropdown.component";
@@ -41,7 +42,7 @@ interface TemplatePart {
         [value]="getDropdownValue(part.dropdownIndex)"
         [options]="part.dropdownConfig.options"
         [placeholder]="part.dropdownConfig.placeholder || '?'"
-        [isDisabled]="isDisabled()"
+        [isDisabled]="isDisabled"
         [validationState]="getValidationState(part.dropdownIndex)"
         (valueChange)="onDropdownChange($event, part.dropdownIndex)"
       />
@@ -78,11 +79,13 @@ interface TemplatePart {
   ],
 })
 export class TemplateRendererComponent implements OnChanges {
-  template = input<string>("");
-  question = input<any>(); //input<QuestionData>();
-  responseValue = input<ResponseValue>({});
-  isDisabled = input<boolean>(false);
-  validationStates = input<ValidationStates>({});
+  // template = input<string>("");
+
+  @Input() template: string = "";
+  @Input() question: QuestionData | null = null; // @Input() question: QuestionData;
+  @Input() responseValue: ResponseValue = {};
+  @Input() isDisabled: boolean = false;
+  @Input() validationStates: ValidationStates = {};
 
   dropdownChange = output<ResponseValue>();
 
@@ -93,21 +96,23 @@ export class TemplateRendererComponent implements OnChanges {
 
   constructor() {
     console.log("TemplateRendererComponent initialized");
-    console.log("Initial template:", this.template());
+    console.log("Initial template:", this.template);
     effect(() => {
-      const templateValue = this.template();
-      const questionValue = this.question();
-      this.parseTemplate(templateValue, questionValue);
+      if (this.question !== null) {
+        const templateValue = this.template;
+        const questionValue = this.question;
+        this.parseTemplate(templateValue, questionValue);
+      }
     });
 
     effect(() => {
-      const response = this.responseValue();
+      const response = this.responseValue;
       this.currentResponse.set({ ...response });
     });
   }
 
   ngOnChanges(): void {
-    console.log("ngOnChanges called with template:", this.template());
+    console.log("ngOnChanges called with template:", this.template);
   }
 
   private parseTemplate(templateStr: string, questionData: QuestionData): void {
@@ -158,6 +163,6 @@ export class TemplateRendererComponent implements OnChanges {
   }
 
   getValidationState(index: number): "correct" | "incorrect" | null {
-    return this.validationStates()[index] || null;
+    return this.validationStates[index] || null;
   }
 }

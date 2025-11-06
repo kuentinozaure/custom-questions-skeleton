@@ -9,6 +9,7 @@ import {
   output,
   computed,
   inject,
+  Input,
 } from "@angular/core";
 
 @Component({
@@ -18,8 +19,8 @@ import {
     <div class="dropdown-container" [class]="validationClass()">
       <button
         class="dropdown-trigger"
-        [class.has-value]="value() !== undefined"
-        [disabled]="isDisabled()"
+        [class.has-value]="value !== undefined"
+        [disabled]="isDisabled"
         (click)="toggleDropdown()"
         type="button"
       >
@@ -28,7 +29,7 @@ import {
 
       @if (isOpen()) {
       <ul class="dropdown-options">
-        @for (option of options(); track option) {
+        @for (option of options; track option) {
         <li
           class="dropdown-option"
           [class.selected]="isSelected(option)"
@@ -143,10 +144,10 @@ import {
   ],
 })
 export class DropdownComponent {
-  value = input<string | undefined>(undefined);
-  options = input<string[]>([]);
-  placeholder = input<string>("?");
-  isDisabled = input<boolean>(false);
+  @Input() value: string | undefined = undefined;
+  @Input() options: string[] = [];
+  @Input() placeholder: string = "?";
+  @Input() isDisabled: boolean = false;
   validationState = input<"correct" | "incorrect" | null>(null);
 
   valueChange = output<string>();
@@ -156,8 +157,8 @@ export class DropdownComponent {
   private elementRef: ElementRef = inject(ElementRef);
 
   displayValue = computed(() => {
-    const val = this.value();
-    return val !== undefined ? val : this.placeholder();
+    const val = this.value;
+    return val !== undefined ? val : this.placeholder;
   });
 
   validationClass = computed(() => {
@@ -170,7 +171,7 @@ export class DropdownComponent {
   constructor() {}
 
   toggleDropdown(): void {
-    if (!this.isDisabled()) {
+    if (!this.isDisabled) {
       this.isOpen.set(!this.isOpen());
     }
   }
@@ -188,6 +189,6 @@ export class DropdownComponent {
   }
 
   isSelected(option: string): boolean {
-    return this.value() === option;
+    return this.value === option;
   }
 }

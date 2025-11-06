@@ -12,6 +12,7 @@ import {
   ComponentRef,
   createEnvironmentInjector,
   EnvironmentInjector,
+  Injector,
 } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 import { TemplateRendererComponent } from "../components/template-renderer/template-renderer.component";
@@ -166,23 +167,25 @@ export default class Question {
       // --- L'étape OBLIGATOIRE du "runtime" Angular ---
       // Cette étape crée l'injecteur minimal nécessaire. Ce n'est PAS une application visible.
       const app = await createApplication({
-        providers: [provideZonelessChangeDetection(), provideClientHydration()],
+        providers: [
+          provideZonelessChangeDetection(),
+          provideClientHydration(),
+          // Vous pouvez ajouter d'autres providers ici si nécessaire
+          // Pas besoin de fournir Injector explicitement, il est automatiquement disponible
+        ],
       });
 
       // 2. Créez la classe du Web Component
+      // L'injector de l'application contient tous les providers nécessaires (DomSanitizer, etc.)
       const TemplateRendererElement = createCustomElement(
         TemplateRendererComponent,
         {
-          injector: app.injector,
+          injector: app.injector, // Cet injector contient déjà tous les providers, y compris lui-même
         }
       );
 
       if (!customElements.get(ELEMENT_NAME)) {
         customElements.define(ELEMENT_NAME, TemplateRendererElement);
-
-        console.log(
-          `Widget Angular '${ELEMENT_NAME}' prêt à être utilisé dans la page hôte (PHP/JS).`
-        );
       }
 
       // https://angular.dev/guide/elements#example-1
@@ -197,6 +200,20 @@ export default class Question {
       templateRenderer.template = template;
 
       container.appendChild(templateRenderer);
+
+      // Attendre le prochain tick pour que l'élément soit complètement initialisé
+      requestAnimationFrame(() => {
+        // Maintenant définir les propriétés
+        templateRenderer.question = question;
+        templateRenderer.responseValue = response || {};
+        templateRenderer.template = template;
+
+        console.log("Propriétés définies sur le custom element:", {
+          question: templateRenderer.question,
+          responseValue: templateRenderer.responseValue,
+          template: templateRenderer.template,
+        });
+      });
 
       // CODE BEFORE THE CUSTOM ELEMENTS INVESTIGATION
       // // Create minimal environment injector without application context
