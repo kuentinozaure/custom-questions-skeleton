@@ -1,6 +1,14 @@
 import "@angular/compiler";
 
-import { Component, input, output, signal, effect } from "@angular/core";
+import {
+  Component,
+  input,
+  output,
+  signal,
+  effect,
+  Inject,
+  inject,
+} from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { DropdownComponent } from "../dropdown/dropdown.component";
 import {
@@ -80,7 +88,9 @@ export class TemplateRendererComponent {
   currentResponse = signal<ResponseValue>({});
   templateParts = signal<TemplatePart[]>([]);
 
-  constructor(private sanitizer: DomSanitizer) {
+  sanitizer = inject(DomSanitizer);
+
+  constructor() {
     effect(() => {
       const templateValue = this.template();
       const questionValue = this.question();
