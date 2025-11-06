@@ -6,7 +6,8 @@
     "dev": "yarn install && php -S localhost:1234 & webpack watch --mode development --devtool eval-source-map",
     "build": "webpack --mode production",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "nuke-and-pave": "rm -rf dist/ && yarn build && yarn dev"
   },
   "dependencies": {
     "@angular/common": "^20.0.0",
