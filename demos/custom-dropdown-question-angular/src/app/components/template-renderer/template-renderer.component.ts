@@ -1,5 +1,3 @@
-// import "@angular/compiler";
-
 import {
   Component,
   input,
