@@ -1,4 +1,4 @@
-import "@angular/compiler";
+// import "@angular/compiler";
 
 import {
   Component,
