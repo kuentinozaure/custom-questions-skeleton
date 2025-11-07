@@ -164,7 +164,7 @@ export default class Question {
 
     try {
       const app = await createApplication({
-        providers: [provideZonelessChangeDetection(), provideClientHydration()],
+        providers: [provideZonelessChangeDetection()],
       });
 
       const TemplateRendererElement = createCustomElement(

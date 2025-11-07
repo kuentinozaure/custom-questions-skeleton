@@ -9,6 +9,8 @@ import {
   computed,
   inject,
   Input,
+  Output,
+  EventEmitter,
 } from "@angular/core";
 
 @Component({
@@ -148,8 +150,7 @@ export class DropdownComponent {
   @Input() placeholder: string = "?";
   @Input() isDisabled: boolean = false;
   @Input() validationState: "correct" | "incorrect" | null = null;
-
-  valueChange = output<string>();
+  @Output() valueChange = new EventEmitter<string>();
 
   isOpen = signal(false);
 
