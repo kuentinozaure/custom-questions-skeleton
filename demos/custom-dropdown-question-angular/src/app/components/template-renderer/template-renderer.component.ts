@@ -6,8 +6,6 @@ import {
   effect,
   inject,
   Input,
-  Output,
-  EventEmitter,
 } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { DropdownComponent } from "../dropdown/dropdown.component";
@@ -31,7 +29,7 @@ interface TemplatePart {
   imports: [DropdownComponent],
   template: `
     <div class="template-renderer">
-      @for (part of templateParts; track $index) {
+      @for (part of templateParts(); track $index) {
       <span [innerHTML]="part.htmlContent"></span>
 
       @if (!part.isLastPart && part.dropdownConfig && part.dropdownIndex !==
@@ -47,64 +45,69 @@ interface TemplatePart {
       } }
     </div>
   `,
-  styles: `.template-renderer {
-  font-size: 16px;
-  line-height: 1.6;
-  color: #333;
+  styles: [
+    `
+      .template-renderer {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #333;
 
-  span {
-    display: inline;
-  }
+        span {
+          display: inline;
+        }
 
-  :host ::ng-deep {
-    p {
-      margin: 0;
-      display: inline;
-    }
+        :host ::ng-deep {
+          p {
+            margin: 0;
+            display: inline;
+          }
 
-    strong {
-      font-weight: 600;
-    }
+          strong {
+            font-weight: 600;
+          }
 
-    em {
-      font-style: italic;
-    }
-  }
-}
-`,
+          em {
+            font-style: italic;
+          }
+        }
+      }
+    `,
+  ],
 })
 export class TemplateRendererComponent {
+  // template = input<string>("");
+
   @Input() template: string = "";
-  @Input() question: QuestionData | null = null;
+  @Input() question: QuestionData | null = null; // @Input() question: QuestionData;
   @Input() responseValue: ResponseValue = {};
   @Input() isDisabled: boolean = false;
   @Input() validationStates: ValidationStates = {};
 
-  @Output() dropdownChange = new EventEmitter<ResponseValue>();
+  dropdownChange = output<ResponseValue>();
 
-  currentResponse: ResponseValue = {};
-  templateParts: TemplatePart[] = [];
+  currentResponse = signal<ResponseValue>({});
+  templateParts = signal<TemplatePart[]>([]);
 
   sanitizer = inject(DomSanitizer);
 
   constructor() {
     effect(() => {
-      const templateValue = this.template;
-      const questionValue = this.question;
-      if (questionValue) {
+      if (this.question !== null) {
+        const templateValue = this.template;
+        const questionValue = this.question;
         this.parseTemplate(templateValue, questionValue);
       }
     });
 
     effect(() => {
       const response = this.responseValue;
-      this.currentResponse = { ...response };
+      this.currentResponse.set({ ...response });
     });
   }
 
   private parseTemplate(templateStr: string, questionData: QuestionData): void {
     if (!templateStr) {
-      this.templateParts = [];
+      this.templateParts.set([]);
       return;
     }
 
@@ -129,7 +132,7 @@ export class TemplateRendererComponent {
       return templatePart;
     });
 
-    this.templateParts = parsedParts;
+    this.templateParts.set(parsedParts);
   }
 
   private sanitizeHtml(html: string): SafeHtml {
@@ -138,15 +141,15 @@ export class TemplateRendererComponent {
 
   onDropdownChange(value: string, index: number): void {
     const updatedResponse = {
-      ...this.currentResponse,
+      ...this.currentResponse(),
       [index]: value,
     };
-    this.currentResponse = updatedResponse;
+    this.currentResponse.set(updatedResponse);
     this.dropdownChange.emit(updatedResponse);
   }
 
   getDropdownValue(index: number): string | undefined {
-    return this.currentResponse[index];
+    return this.currentResponse()[index];
   }
 
   getValidationState(index: number): "correct" | "incorrect" | null {

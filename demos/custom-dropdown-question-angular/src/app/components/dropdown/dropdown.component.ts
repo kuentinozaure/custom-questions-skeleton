@@ -10,6 +10,7 @@ import {
   Input,
   Output,
   EventEmitter,
+  ChangeDetectorRef,
 } from "@angular/core";
 
 @Component({
@@ -27,7 +28,8 @@ import {
         {{ displayValue() }}
       </button>
 
-      @if (isOpen) {
+      Value of isOpen : {{ isOpen() }}
+      @if (isOpen()) {
       <ul class="dropdown-options">
         @for (option of options; track option) {
         <li
@@ -149,9 +151,10 @@ export class DropdownComponent {
 
   @Output() valueChange = new EventEmitter<string>();
 
-  isOpen = false;
+  isOpen = signal(false);
 
   private elementRef = inject(ElementRef);
+  private cdr = inject(ChangeDetectorRef);
 
   displayValue = computed(() => {
     const val = this.value;
@@ -168,21 +171,21 @@ export class DropdownComponent {
   constructor() {}
 
   toggleDropdown(): void {
-    console.log("isDisabled:", this.isDisabled);
     if (!this.isDisabled) {
-      this.isOpen = !this.isOpen;
+      this.isOpen.set(!this.isOpen());
+      this.cdr.detectChanges();
     }
   }
 
   selectOption(option: string): void {
     this.valueChange.emit(option);
-    this.isOpen = false;
+    this.isOpen.set(false);
   }
 
   @HostListener("document:mousedown", ["$event"])
   onDocumentClick(event: MouseEvent): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.isOpen = false;
+      this.isOpen.set(false);
     }
   }
 

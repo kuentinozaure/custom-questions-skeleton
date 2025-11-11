@@ -152,6 +152,7 @@ export default class Question {
       const app = await createApplication({
         // Active la détection de changements sans Zone.js
         providers: [provideZonelessChangeDetection()],
+   
       });
       // // Create minimal environment injector without application context
       // this.environmentInjector = createEnvironmentInjector(
@@ -169,7 +170,8 @@ export default class Question {
 
       this.componentRef.setInput("template", template);
       this.componentRef.setInput("question", question);
-      this.componentRef.setInput("responseValue", response ?? {});
+      this.componentRef.setInput("responseValue", response || {});
+      this.componentRef.changeDetectorRef.detectChanges();
 
       this.componentRef.instance.dropdownChange.subscribe((responses: any) => {
         this.onValueChange(responses);
