@@ -6,11 +6,23 @@
  * Learnosity's public API.
  */
 
-import { createComponent, ComponentRef, createEnvironmentInjector, EnvironmentInjector } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import { TemplateRendererComponent } from '../components/template-renderer/template-renderer.component';
-import { PREFIX } from '../constants';
-import '../../styles/main.scss';
+import "@angular/compiler";
+
+import {
+  createComponent,
+  ComponentRef,
+  createEnvironmentInjector,
+  EnvironmentInjector,
+  provideZonelessChangeDetection,
+  signal,
+  input,
+} from "@angular/core";
+import { DOCUMENT } from "@angular/common";
+import { TemplateRendererComponent } from "../components/template-renderer/template-renderer.component";
+import { PREFIX } from "../constants";
+import "../../styles/main.scss";
+import { createApplication } from "@angular/platform-browser";
+import { DropdownComponent } from "app/components/dropdown/dropdown.component";
 
 interface LrnUtils {
   [key: string]: any;
@@ -19,7 +31,7 @@ interface LrnUtils {
 interface InitOptions {
   question: any;
   response: any;
-  state: 'initial' | 'resume' | 'review';
+  state: "initial" | "resume" | "review";
   $el: any;
   events: any;
   getFacade: () => any;
@@ -53,13 +65,12 @@ export default class Question {
        * "review" for showing the completed assessment and results to the learner or teacher
        */
 
-      if (init.state === 'resume') {
+      if (init.state === "resume") {
         /**
          * If you want your custom question to support resume state
          * (For a learner to be able to come back to your question in a future sitting after having previously started and saved the assessment),
          * then make make sure to update your question's UI to display the previously saved response Questions API has stored in the back end.
          */
-
         // EXAMPLE implementation:
         // if(init.response) {
         //     // This example assumes a simple DOM input for the custom question's UI, and updates its value to the value of the saved response upon resume.
@@ -67,7 +78,7 @@ export default class Question {
         // }
       }
 
-      if (init.state === 'review') {
+      if (init.state === "review") {
         /**
          * If you want your custom question to support review state
          * (For a learner or instructor to be able to view their results in a read-only mode after having completed and submitted the assessment),
@@ -89,7 +100,7 @@ export default class Question {
         init.getFacade().disable();
       }
 
-      init.events.trigger('ready');
+      init.events.trigger("ready");
     });
   }
 
@@ -107,17 +118,25 @@ export default class Question {
       </div>
     `;
 
-    const container = el.querySelector('.question-rendering-container') as HTMLElement | undefined;
+    const container = el.querySelector(".question-rendering-container") as
+      | HTMLElement
+      | undefined;
 
     if (!container) {
-      throw new Error('Question rendering container not found');
+      throw new Error("Question rendering container not found");
     }
 
     await this.renderComponent(container);
 
     return Promise.all([
-      lrnUtils.renderComponent('SuggestedAnswersList', el.querySelector(`.${PREFIX}-suggestedAnswers-wrapper`)),
-      lrnUtils.renderComponent('CheckAnswerButton', el.querySelector(`.${PREFIX}-checkAnswer-wrapper`))
+      lrnUtils.renderComponent(
+        "SuggestedAnswersList",
+        el.querySelector(`.${PREFIX}-suggestedAnswers-wrapper`)
+      ),
+      lrnUtils.renderComponent(
+        "CheckAnswerButton",
+        el.querySelector(`.${PREFIX}-checkAnswer-wrapper`)
+      ),
     ]).then(([suggestedAnswersList]) => {
       this.suggestedAnswersList = suggestedAnswersList;
     });
@@ -127,41 +146,44 @@ export default class Question {
     const { init } = this;
     const { question, response } = init;
 
-    const template = question.custom_dropdown_template || '';
+    const template = question.custom_dropdown_template || "";
 
     try {
-      // Create minimal environment injector without application context
-      this.environmentInjector = createEnvironmentInjector(
-        [
-          { provide: DOCUMENT, useValue: document }
-        ],
-        null as any // No parent injector needed for standalone components
-      );
+      const app = await createApplication({
+        // Active la détection de changements sans Zone.js
+        providers: [provideZonelessChangeDetection()],
+      });
+      // // Create minimal environment injector without application context
+      // this.environmentInjector = createEnvironmentInjector(
+      //   [
+      //     { provide: DOCUMENT, useValue: document }
+      //   ],
+      //   null as any // No parent injector needed for standalone components
+      // );
 
       // Create the standalone component
       this.componentRef = createComponent(TemplateRendererComponent, {
-        environmentInjector: this.environmentInjector,
-        hostElement: container
+        hostElement: container,
+        environmentInjector: app.injector,
       });
 
-      this.componentRef.setInput('template', template);
-      this.componentRef.setInput('question', question);
-      this.componentRef.setInput('responseValue', response ?? {});
+      this.componentRef.setInput("template", template);
+      this.componentRef.setInput("question", question);
+      this.componentRef.setInput("responseValue", response ?? {});
 
       this.componentRef.instance.dropdownChange.subscribe((responses: any) => {
         this.onValueChange(responses);
       });
 
       this.componentRef.changeDetectorRef.detectChanges();
-
     } catch (error) {
-      console.error('Error creating Angular component:', error);
+      console.error("Error creating Angular component:", error);
       throw error;
     }
   }
 
   onValueChange(responses: any) {
-    this.events.trigger('changed', responses);
+    this.events.trigger("changed", responses);
   }
 
   /**
@@ -181,7 +203,6 @@ export default class Question {
        * If you plan to display your custom question in "review" state, then you need to implement this
        * method to prevent a learner or instructor who is reviewing their completed results from being able to change the responses in your question UI.
        */
-
       // EXAMPLE implementation
       // document.getElementById('my-input').setAttribute('disabled', true)
     };
@@ -193,7 +214,6 @@ export default class Question {
        *
        * (For example, you plan to temporarily disable the question UI for a student taking the assessment until they complete another task like spend a set time reading the instructions.)
        */
-
       // EXAMPLE implementation
       // document.getElementById('my-input').removeAttribute('disabled')
     };
@@ -204,14 +224,10 @@ export default class Question {
        * and restoring the question to its initial blank state before a response was entered.
        * (For example, in a multiple choice question where a student has picked a choice, you reset the question so that no choices are picked at all.)
        */
-
       // TODO: Requires implementation, you could use the following steps
-
       // trigger a 'resetResponse' event to reset the value of response
       // this.events.trigger('resetResponse');
-
       // reset other states if you need
-
       // re-render the component, manage the 'reset' state by yourself
     };
 
@@ -224,9 +240,7 @@ export default class Question {
        * The following is an example implementation that shows the standard Learnosity "checkmark / tick" for a correct answer
        * or the standard Learnosity "x mark / cross" for an incorrect answer.
        */
-
       // EXAMPLE implemetation:
-
       // const answerIsCorrect = facade.isValid();
       // /**
       //  * update the UI based on the result
@@ -256,13 +270,10 @@ export default class Question {
        * The following is an example implementation that removes the standard Learnosity validation UI ("checkmark / tick" if the previous response was correct
        * or "x mark / cross" if the previous response was incorrect).
        */
-
       // Example implementation:
-
       // // we will remove the Learnosity checkmark or x previously showing
       // el.querySelector(".lrn_response_input").classList.remove("lrn_correct");
       // el.querySelector(".lrn_response_input").classList.remove("lrn_incorrect");
-
       // // if we chose to also display the correct answer, we will now remove the display of the correct answer as well by
       // // leveraging the suggestedAnswersList.reset() method.
       // this.suggestedAnswersList.reset()
@@ -322,7 +333,7 @@ export default class Question {
     // options.showCorrectAnswers will tell if correct answers for this question should be display or not.
     // The value showCorrectAnswers by default is the value of showCorrectAnswers inside initOptions object that is used
     // to initialize question app or the value of the options that is passed into public method validate (like question.validate({showCorrectAnswers: false}))
-    events.on('validate', () => {
+    events.on("validate", () => {
       // OPTIONAL Step 1:
       //If you want to show changes to the UI for a correct or incorrect answer when the learner presses check answer
       // then make sure you have also implemented facade.showValidationUI(), and that you call it here:
