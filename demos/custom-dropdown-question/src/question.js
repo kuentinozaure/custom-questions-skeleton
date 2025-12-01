@@ -1,9 +1,9 @@
-import Question from './question/index';
-import '../scss/main.scss';
+import Question from "./question/index";
+import "../scss/main.scss";
 
 /*global LearnosityAmd*/
 LearnosityAmd.define([], function () {
-    return {
-        Question
-    };
+  return {
+    Question, // the shorthand for Question: Question
+  };
 });
